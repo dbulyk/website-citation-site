@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const copy = (page) => page.getByRole('button', { name: 'Copy citation' });
+const copy = (page) => page.getByRole('button', { name: /^Copy (citation|again)$/ });
 const citation = (page) => page.locator('#citation');
 const offer = (page) => page.locator('#auto-offer');
 const status = (page) => page.locator('#copy-status');
@@ -11,14 +11,14 @@ async function clipboardStub(page, mode = 'rich') {
   await page.addInitScript((mode) => {
     window.__clip = [];
     const write = async (items) => {
-      if (mode !== 'rich') throw new Error('rich unavailable');
+      if (mode !== 'rich' || window.__failClipboard) throw new Error('rich unavailable');
       const item = items[0];
       const plain = await (await item.getType('text/plain')).text();
       const html = await (await item.getType('text/html')).text();
       window.__clip.push({ plain, html, kind: 'rich' });
     };
     const writeText = async (plain) => {
-      if (mode === 'fail') throw new Error('clipboard denied');
+      if (mode === 'fail' || window.__failClipboard) throw new Error('clipboard denied');
       window.__clip.push({ plain, kind: 'plain' });
     };
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { write, writeText } });
@@ -120,23 +120,33 @@ test('invalid URL and missing title prevent stale copy, then repair restores out
   expect(await page.evaluate(() => window.__clip)).toHaveLength(0);
 });
 
-test('copy writes current rich and plain values before first session offer', async ({ page }) => {
+test('copy offers install on every success, including after close and reload; failure clears it', async ({ page }) => {
   const text = await citation(page).textContent();
-  await copy(page).click();
-  await expect(status(page)).toContainText(/copied/i);
-  await expect(offer(page)).toBeVisible();
+  for (let i = 0; i < 2; i++) {
+    await copy(page).click();
+    await expect(copy(page)).toBeFocused();
+    await expect(status(page)).toContainText(/copied/i);
+    await expect(offer(page)).toBeVisible();
+    await expect(offer(page)).toHaveText(/add to chrome/i);
+    if (i === 0) {
+      await page.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect(offer(page)).toBeHidden();
+    }
+  }
   const writes = await page.evaluate(() => window.__clip);
-  expect(writes).toHaveLength(1);
-  expect(writes[0].kind).toBe('rich');
-  expect(writes[0].plain).toBe(text);
+  expect(writes).toHaveLength(2);
+  expect(writes[0]).toMatchObject({ plain: text, kind: 'rich' });
   expect(writes[0].html).toMatch(/<(i|em)>/);
-  await page.getByRole('button', { name: 'Continue on website' }).click();
-  await expect(offer(page)).toBeHidden();
+  await page.evaluate(() => { window.__failClipboard = true; });
   await copy(page).click();
+  await expect(status(page)).toContainText(/couldn.t copy|unable to copy|failed to copy/i);
   await expect(offer(page)).toBeHidden();
+  await page.evaluate(() => { window.__failClipboard = false; });
+  await copy(page).click();
+  await expect(offer(page)).toBeVisible();
   await page.reload();
   await copy(page).click();
-  await expect(offer(page)).toBeHidden();
+  await expect(offer(page)).toBeVisible();
 });
 
 test('rich copy failure falls back to plain copy', async ({ browser }) => {
@@ -166,7 +176,7 @@ test('clipboard rejection displays error without success or offer', async ({ bro
 });
 
 test('explicit capture and library dialogs trap focus, Escape closes and returns focus', async ({ page }) => {
-  for (const name of ['Capture details with the extension', 'Save in extension library']) {
+  for (const name of ['Capture details with the extension', 'Save in library']) {
     const trigger = page.getByRole('button', { name, exact: true });
     await trigger.focus();
     await page.keyboard.press('Enter');

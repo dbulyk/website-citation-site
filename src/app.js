@@ -11,6 +11,8 @@ const addAuthor = byId('add-author');
 const removeFirstAuthor = byId('remove-first-author');
 const exampleButtons = document.querySelectorAll('[data-example]');
 const dateFields = ['year', 'month', 'day'].map(byId);
+const resultPanel = document.querySelector('.result-sticky');
+const extraDetails = document.querySelector('.source-extra');
 const checked = (name) => document.querySelector('input[name="' + name + '"]:checked').value;
 const value = (id) => byId(id).value.trim();
 const examples = {
@@ -41,6 +43,7 @@ const examples = {
 const emptyCitation = 'Your citation will appear here as you enter the source details.';
 let currentCitation;
 let copyPending = false;
+let copyOfferInterrupted = false;
 
 function setError(element, message, ...fields) {
   element.textContent = message;
@@ -165,7 +168,7 @@ function reportCopy(message = '', failed = false) {
 }
 
 function update() {
-  dismissAutoOffer();
+  dismissCopyOffer();
   reportCopy();
   render();
 }
@@ -244,138 +247,44 @@ source.addEventListener('input', () => {
   update();
 });
 source.addEventListener('submit', (event) => event.preventDefault());
-document.querySelector('.result-sticky').addEventListener('input', update);
+resultPanel.addEventListener('input', update);
 for (const button of exampleButtons) {
   button.addEventListener('click', () => selectExample(button.dataset.example));
 }
 
 const dialog = byId('install-dialog');
-const autoOffer = byId('auto-offer');
-const offerContent = autoOffer.querySelector('.offer-content');
-const announcement = byId('auto-offer-announcement');
-const visualViewport = window.visualViewport;
-const offerKey = 'website-citation-install-offer-seen';
+const installLink = byId('auto-offer');
+const closeCopyOffer = byId('close-auto-offer');
+const copyRow = byId('copy-row');
 const offerCopy = {
   capture: ['Capture details from a page', 'Open the source page in desktop Chrome and use Website Citation to collect its citation details.'],
   library: ['Keep citations in your library', 'Use the Website Citation extension to save citations in its library for later.'],
 };
-let offerSeen = false;
 let offerTrigger;
-let offerViewport;
-let copyOfferInterrupted = false;
-try {
-  offerSeen = sessionStorage.getItem(offerKey) === '1';
-} catch {}
 
-function suppressOffer() {
-  offerSeen = true;
-  try {
-    sessionStorage.setItem(offerKey, '1');
-  } catch {}
+function setCopyOffer(visible) {
+  copyRow.classList.toggle('has-offer', visible);
+  copyButton.textContent = visible ? 'Copy again' : 'Copy citation';
+  installLink.hidden = closeCopyOffer.hidden = !visible;
 }
 
-function dismissAutoOffer(restoreFocus = false) {
-  if (autoOffer.hidden) return;
-  const returnToCopy = restoreFocus && autoOffer.contains(document.activeElement);
-  autoOffer.hidden = true;
-  announcement.textContent = '';
-  if (returnToCopy) copyButton.focus({ preventScroll: true });
-}
-
-function readViewport() {
-  return {
-    left: visualViewport?.offsetLeft ?? 0,
-    top: visualViewport?.offsetTop ?? 0,
-    width: visualViewport?.width ?? document.documentElement.clientWidth,
-    height: visualViewport?.height ?? document.documentElement.clientHeight,
-    pageLeft: visualViewport?.pageLeft ?? window.scrollX,
-    pageTop: visualViewport?.pageTop ?? window.scrollY,
-  };
-}
-
-function sameScroll(first, second) {
-  return first.pageLeft === second.pageLeft && first.pageTop === second.pageTop;
-}
-
-function showAutoOffer(viewport) {
-  const gap = 12;
-  const margin = 8;
-  const copy = copyButton.getBoundingClientRect();
-  const left = Math.max(copy.left, viewport.left + margin);
-  const right = Math.min(copy.right, viewport.left + viewport.width - margin);
-  const top = viewport.top + margin;
-  const bottom = viewport.top + viewport.height - margin;
-  const upperEdge = Math.min(copy.top - gap, bottom);
-  const above = upperEdge - top;
-  const sourceRect = source.getBoundingClientRect();
-  const overlapsSource = left < sourceRect.right && right > sourceRect.left;
-  const lowerEdge = Math.max(copy.bottom + (overlapsSource ? 8 : gap), top);
-  const lowerLimit = overlapsSource ? Math.min(bottom, sourceRect.top - gap) : bottom;
-  const below = lowerLimit - lowerEdge;
-  const placeAbove = above > below;
-  const space = Math.max(above, below);
-  if (left >= right || space <= 0) return;
-
-  autoOffer.style.setProperty('--offer-left', left + 'px');
-  autoOffer.style.setProperty('--offer-width', (right - left) + 'px');
-  autoOffer.style.setProperty('--offer-edge', (placeAbove ? upperEdge : lowerEdge) + 'px');
-  autoOffer.style.setProperty('--offer-space', space + 'px');
-  autoOffer.dataset.placement = placeAbove ? 'above' : 'below';
-  autoOffer.toggleAttribute('data-compact', space < 220);
-  autoOffer.hidden = false;
-
-  const card = autoOffer.getBoundingClientRect();
-  const actions = [byId('close-auto-offer'), autoOffer.querySelector('.offer-actions a'), byId('continue-auto-offer')]
-    .map((action) => action.getBoundingClientRect());
-  const actionsDoNotFit = actions.some((action, index) => (
-    action.left < card.left || action.right > card.right || action.top < card.top || action.bottom > card.bottom
-    || actions.slice(0, index).some((other) => (
-      action.left < other.right && action.right > other.left && action.top < other.bottom && action.bottom > other.top
-    ))
-  ));
-  if (actionsDoNotFit) {
-    autoOffer.hidden = true;
-    return;
-  }
-
-  offerViewport = viewport;
-  offerContent.tabIndex = offerContent.scrollHeight > offerContent.clientHeight ? 0 : -1;
-  suppressOffer();
-  announcement.textContent = 'Cite as you browse. ' + offerContent.querySelector('p').textContent;
-}
-
-function handleOutsideOffer({ target }) {
-  if (autoOffer.contains(target)) return;
-  if (copyPending && target !== copyButton) copyOfferInterrupted = true;
-  dismissAutoOffer();
-}
-
-function dismissOnViewportChange() {
-  if (autoOffer.hidden) return;
-  const viewport = readViewport();
-  if (sameScroll(offerViewport, viewport) && offerViewport.width === viewport.width && offerViewport.height === viewport.height) return;
-  const { left, right, top, bottom } = copyButton.getBoundingClientRect();
-  const copyInView = left >= viewport.left && right <= viewport.left + viewport.width
-    && top >= viewport.top && bottom <= viewport.top + viewport.height;
-  dismissAutoOffer(copyInView);
-}
-
-for (const id of ['close-auto-offer', 'continue-auto-offer']) {
-  byId(id).addEventListener('click', () => dismissAutoOffer(true));
-}
-document.addEventListener('pointerdown', handleOutsideOffer, { capture: true });
-document.addEventListener('focusin', handleOutsideOffer);
-document.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape') return;
+function dismissCopyOffer() {
   if (copyPending) copyOfferInterrupted = true;
-  if (autoOffer.hidden) return;
-  event.preventDefault();
-  dismissAutoOffer(true);
+  if (installLink.hidden) return;
+  if (document.activeElement === installLink || document.activeElement === closeCopyOffer) {
+    copyButton.focus({ preventScroll: true });
+  }
+  setCopyOffer(false);
+}
+
+closeCopyOffer.addEventListener('click', () => {
+  copyButton.focus({ preventScroll: true });
+  dismissCopyOffer();
 });
-window.addEventListener('scroll', dismissOnViewportChange);
-window.addEventListener('resize', dismissOnViewportChange);
-visualViewport?.addEventListener('scroll', dismissOnViewportChange);
-visualViewport?.addEventListener('resize', dismissOnViewportChange);
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || dialog.open) return;
+  dismissCopyOffer();
+});
 
 for (const button of document.querySelectorAll('[data-offer]')) {
   button.addEventListener('click', () => {
@@ -383,7 +292,7 @@ for (const button of document.querySelectorAll('[data-offer]')) {
     const [heading, body] = offerCopy[button.dataset.offer];
     byId('offer-title').textContent = heading;
     byId('offer-body').textContent = body;
-    dismissAutoOffer();
+    dismissCopyOffer();
     dialog.showModal();
   });
 }
@@ -400,7 +309,6 @@ dialog.addEventListener('keydown', (event) => {
   }
 });
 dialog.addEventListener('close', () => {
-  suppressOffer();
   offerTrigger.focus({ preventScroll: true });
 });
 
@@ -420,16 +328,16 @@ async function writeCitation({ html, text }) {
 
 copyButton.addEventListener('click', async () => {
   if (copyPending || !currentCitation) return;
+  dismissCopyOffer();
+  reportCopy();
   const copied = currentCitation;
-  const initialViewport = readViewport();
   copyOfferInterrupted = false;
   copyPending = true;
   try {
     await writeCitation(copied);
     reportCopy(copied === currentCitation ? 'Citation copied.' : 'Previous citation copied.');
-    if (!offerSeen && !dialog.open && !copyOfferInterrupted && copied === currentCitation) {
-      const viewport = readViewport();
-      if (sameScroll(initialViewport, viewport)) showAutoOffer(viewport);
+    if (!dialog.open && !copyOfferInterrupted && copied === currentCitation) {
+      setCopyOffer(true);
     }
   } catch {
     reportCopy('Couldn’t copy the citation. Please try again.', true);
@@ -439,3 +347,41 @@ copyButton.addEventListener('click', async () => {
 });
 
 selectExample('person');
+
+extraDetails.querySelector('summary').addEventListener('click', (event) => {
+  const pointer = event.detail > 0;
+  const alreadyAnimating = extraDetails.classList.contains('pointer-toggle');
+  extraDetails.classList.toggle('pointer-toggle', pointer);
+  if (pointer && !alreadyAnimating) {
+    // Apply the transition to the current size before the native click toggles open.
+    getComputedStyle(extraDetails, '::details-content').blockSize;
+  }
+});
+extraDetails.addEventListener('transitionend', (event) => {
+  if (event.pseudoElement === '::details-content' && ['block-size', 'height'].includes(event.propertyName)) {
+    extraDetails.classList.remove('pointer-toggle');
+  }
+});
+
+if ('ResizeObserver' in window) {
+  new ResizeObserver(([entry]) => {
+    const height = entry.borderBoxSize?.[0]?.blockSize ?? resultPanel.getBoundingClientRect().height;
+    resultPanel.style.setProperty('--result-height', `${height}px`);
+  }).observe(resultPanel, { box: 'border-box' });
+
+  const walkthrough = document.querySelector('.walkthrough-frame');
+  const demoObserver = new ResizeObserver(([entry]) => {
+    walkthrough.style.height = `${Math.ceil(entry.target.getBoundingClientRect().height)}px`;
+  });
+
+  function observeWalkthrough() {
+    demoObserver.disconnect();
+    // The browser exposes contentDocument only for the same-origin frame.
+    const demo = walkthrough.contentDocument?.querySelector('.cw-demo');
+    if (demo) demoObserver.observe(demo, { box: 'border-box' });
+    else walkthrough.style.removeProperty('height');
+  }
+
+  walkthrough.addEventListener('load', observeWalkthrough);
+  observeWalkthrough();
+}

@@ -14,6 +14,8 @@ npm run preview
 
 Use the Node version range in `package.json`. Serve `dist/` at a domain root or under a subpath. The build copies `uninstall/index.html` byte-for-byte and includes [dependency credits and source](credits/index.html).
 
+Edit the walkthrough's fictional sample and citations in [demo/index.html](demo/index.html). Vite builds it as a separate local page embedded by the homepage.
+
 ## Browser checks
 
 ```sh
