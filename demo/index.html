@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive website citation walkthrough</title>
+  <link rel="stylesheet" href="./demo.css">
+  <script type="module" src="./demo.js"></script>
+</head>
+<body>
+  <main class="cw-demo">
+    <div class="cw-intro">
+      <p class="cw-kicker">Interactive demo</p>
+      <h1>How to cite a website</h1>
+      <p>Try the Website Citation extension with a sample page—no typing needed.</p>
+    </div>
+
+    <div class="cw-layout">
+      <div class="cw-guide">
+        <ol class="cw-steps" role="list" aria-label="Walkthrough steps">
+          <li>
+            <button class="cw-step" type="button" data-step="capture" aria-current="step">
+              <span class="cw-number" aria-hidden="true">1</span>
+              <span><strong>Capture</strong><span class="cw-step-desc">Select “Cite this page” to start a citation for the sample page.</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="cw-step" type="button" data-step="style">
+              <span class="cw-number" aria-hidden="true">2</span>
+              <span><strong>Choose a style</strong><span class="cw-step-desc">Pick APA 7 or MLA 9 and preview the reference.</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="cw-step" type="button" data-step="library">
+              <span class="cw-number" aria-hidden="true">3</span>
+              <span><strong>Save</strong><span class="cw-step-desc">Select “Save to library” to see the saved example.</span></span>
+            </button>
+          </li>
+        </ol>
+        <button class="cw-restart" type="button"><span aria-hidden="true">↺</span> Try again</button>
+      </div>
+
+      <div class="cw-stage-wrap">
+        <div class="cw-scene">
+          <div class="cw-article-backdrop" aria-hidden="true">
+            <div class="cw-article">
+              <div class="cw-browser"><span class="cw-dots">● ● ●</span><span>garden.example / journal</span></div>
+              <div class="cw-article-body">
+                <div class="cw-overline">THE WINDOWSILL JOURNAL</div>
+                <div class="cw-article-title">Growing herbs on a windowsill</div>
+                <p>By Maya Bennett</p>
+                <div class="cw-rule"></div>
+                <div class="cw-lines"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cw-panel" data-panel="capture">
+            <div class="cw-panel-head"><img src="../assets/icon-128.png" width="21" height="21" alt=""><strong>Website Citation</strong></div>
+            <div class="cw-panel-content cw-welcome">
+              <div class="cw-panel-label">Sample page</div>
+              <div class="cw-sample">Growing herbs on a windowsill</div>
+              <p>Maya Bennett</p>
+              <div class="cw-capture-action">
+                <div class="cw-hint" aria-hidden="true">Try it
+                  <svg viewBox="0 0 36 32" width="36" height="32" focusable="false"><path d="M3 3c12 0 19 6 21 21m-6-4 6 6 5-8"/></svg>
+                </div>
+                <button class="cw-primary" id="cw-capture" type="button">Cite this page</button>
+              </div>
+              <button class="cw-secondary" id="cw-open-library" type="button">Open library</button>
+            </div>
+          </div>
+
+          <div class="cw-panel" data-panel="style" inert>
+            <div class="cw-panel-head"><img src="../assets/icon-128.png" width="21" height="21" alt=""><strong>New citation</strong></div>
+            <div class="cw-panel-content">
+              <div class="cw-style-row">
+                <label for="cw-style">Citation style</label>
+                <select id="cw-style"><option value="apa">APA 7</option><option value="mla">MLA 9</option></select>
+              </div>
+              <div class="cw-reference-tabs"><span>Reference</span><span>In-text citation</span></div>
+              <div class="cw-preview">
+                <p class="cw-reference" data-style="apa">Bennett, M. (n.d.). <em>Growing herbs on a windowsill.</em> https://garden.example/herbs</p>
+                <p data-style="mla" inert>Bennett, Maya. “Growing herbs on a windowsill.” garden.example/herbs.</p>
+              </div>
+              <div class="cw-field-label">Title</div>
+              <div class="cw-field">Growing herbs on a windowsill</div>
+              <div class="cw-field-label">Authors</div>
+              <div class="cw-field">Maya Bennett</div>
+              <div class="cw-save-action">
+                <button class="cw-primary" id="cw-save" type="button">Save to library</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cw-panel" data-panel="library" inert>
+            <div class="cw-panel-head"><img src="../assets/icon-128.png" width="21" height="21" alt=""><strong>Library</strong></div>
+            <div class="cw-panel-content">
+              <div class="cw-library-head"><strong>Library</strong><span>1 sample</span></div>
+              <div class="cw-library-state cw-library-message">
+                <div class="cw-saved" id="cw-save-status" role="status" data-library="saved" inert>✓ &nbsp;Saved in this demo</div>
+                <p class="cw-simulated" data-library="preview">This is a sample library. Save the example to see it here.</p>
+              </div>
+              <div class="cw-library-item">
+                <strong>Growing herbs on a windowsill</strong>
+                <span>Maya Bennett</span>
+                <div class="cw-library-state">
+                  <small data-library="saved" inert>Saved example</small>
+                  <small data-library="preview">Sample preview</small>
+                </div>
+              </div>
+              <div class="cw-library-state cw-library-action">
+                <a class="cw-install" aria-describedby="cw-save-status" data-library="saved" inert href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
+                <button class="cw-primary" id="cw-save-from-library" type="button" data-library="preview">Save to library</button>
+              </div>
+              <button class="cw-secondary" id="cw-new-citation" type="button">New citation</button>
+            </div>
+          </div>
+        </div>
+        <p class="cw-note">Simulation only · No page is read and nothing is saved to your library.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
