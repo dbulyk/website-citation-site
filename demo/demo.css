@@ -90,7 +90,7 @@ button, select { cursor: pointer; }
   font-size: 13px;
   font-weight: 700;
 }
-.cw-restart span { margin-right: 4px; }
+.cw-restart > span[aria-hidden="true"] { margin-right: 4px; }
 
 .cw-stage-wrap { min-width: 0; max-width: 620px; container: scene / inline-size; }
 .cw-scene {

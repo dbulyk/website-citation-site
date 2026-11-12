@@ -18,7 +18,9 @@ const staticFiles = [
 export default defineConfig({
   base: './',
   build: {
-    rolldownOptions: { input: ['index.html', 'demo/index.html'] },
+    rolldownOptions: {
+      input: ['index.html', 'demo/index.html', 'welcome/index.html', 'welcome/example/index.html'],
+    },
   },
   plugins: [{
     name: 'copy-static-files',

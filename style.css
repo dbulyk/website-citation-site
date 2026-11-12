@@ -33,7 +33,14 @@ p { line-height: 1.55; }
 .site-header { min-height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .brand img { flex: none; width: 42px; height: 42px; }
-.site-header nav { display: flex; gap: 32px; align-items: center; font-size: 15px; font-weight: 600; }
+.site-header nav { display: flex; gap: 16px; align-items: center; font-size: 15px; font-weight: 600; }
+.language-control { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.language-control label { color: var(--muted); font-size: 14px; }
+.language-control select {
+  min-width: 44px; min-height: 44px; padding: 8px;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  font-size: 14px; font-weight: 600; touch-action: manipulation;
+}
 .intro { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding-top: 28px; padding-bottom: 14px; }
 .intro h1, .content-section h2, .extension h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.035em; }
 .intro h1 { font-size: clamp(42px, 5vw, 70px); line-height: 1.02; }
@@ -52,11 +59,13 @@ p { line-height: 1.55; }
 .segmented label { flex: 1 1 0; min-width: 0; position: relative; cursor: pointer; }
 .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .segmented span { display: flex; min-height: 40px; padding: 7px 8px; align-items: center; justify-content: center; border-radius: 4px; text-align: center; line-height: 1.2; font-weight: 600; font-size: 15px; color: var(--text); }
+.segmented:lang(ru) span { overflow-wrap: anywhere; }
 .segmented input:checked + span { background: var(--surface); color: var(--ink); }
 .result-column .segmented { background: #2d3d58; }
 .result-column .segmented span { color: #e2e9f3; }
 .result-column .segmented input:checked + span { background: var(--surface); color: var(--ink); }
 .result-switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.result-switches:lang(ru) .segmented span { padding-block: 4px; }
 .result-body { display: grid; grid-template-rows: auto 1fr; min-block-size: 228px; }
 .intext-options { margin-top: 20px; display: grid; gap: 18px; }
 .citation-sheet { grid-row: 2; margin-top: 24px; padding: 22px; background: var(--surface); color: var(--text); }
@@ -136,6 +145,8 @@ small { display: block; margin-top: 7px; color: var(--muted); font-size: 14px; l
   .segmented label:hover span { text-decoration: underline; text-underline-offset: 4px; }
 }
 @media (min-width: 761px) {
+  .intro:lang(ru) > p { max-width: 70ch; }
+  .intro:lang(ru) .install-note { max-width: none; }
   .work-grid { overflow-anchor: none; }
   .result-sticky { position: sticky; top: min(24px, calc(100dvh - var(--result-height) - 24px)); }
 }
@@ -164,13 +175,16 @@ small { display: block; margin-top: 7px; color: var(--muted); font-size: 14px; l
 @media (min-width: 901px) and (max-height: 760px) {
   .result-body { min-block-size: 221px; }
 }
+@media (min-width: 1200px) {
+  .language-control label { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
+}
 @media (max-width: 760px) {
   :root { --page-gap: 20px; }
-  .site-header { min-height: 68px; }
-  .site-header nav { gap: 10px; }
+  .site-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; padding-block: 8px; }
+  .site-header nav { flex-direction: column; align-items: flex-end; gap: 0; }
   .nav-example, .nav-how { display: none; }
-  .header-install { font-size: 13px; padding-inline: 12px; }
-  .brand { font-size: 15px; }
+  .header-install { max-width: 160px; font-size: 13px; padding-inline: 12px; }
+  .brand { min-width: 0; min-height: 44px; font-size: 15px; white-space: normal; }
   .brand img { width: 36px; height: 36px; }
   .intro { padding-top: 12px; padding-bottom: 10px; gap: 10px; }
   .intro h1 { font-size: clamp(39px, 9vw, 52px); }
@@ -201,6 +215,11 @@ small { display: block; margin-top: 7px; color: var(--muted); font-size: 14px; l
 }
 @media (max-width: 470px) {
   .result-body { min-block-size: 221px; }
+  .result-column:lang(ru) { padding-top: 20px; }
+}
+@media (min-width: 375px) and (max-width: 470px) {
+  .example-picker:lang(ru) { display: grid; grid-template-columns: auto auto minmax(0, 1fr); }
+  .example-picker:lang(ru) button { min-width: 0; padding-inline: 8px; }
 }
 @media (max-width: 385px) {
   .result-body { min-block-size: 229px; }
