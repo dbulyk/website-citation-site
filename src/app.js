@@ -165,6 +165,7 @@ function reportCopy(message = '', failed = false) {
 }
 
 function update() {
+  dismissAutoOffer();
   reportCopy();
   render();
 }
@@ -250,7 +251,9 @@ for (const button of exampleButtons) {
 
 const dialog = byId('install-dialog');
 const autoOffer = byId('auto-offer');
+const offerContent = autoOffer.querySelector('.offer-content');
 const announcement = byId('auto-offer-announcement');
+const visualViewport = window.visualViewport;
 const offerKey = 'website-citation-install-offer-seen';
 const offerCopy = {
   capture: ['Capture details from a page', 'Open the source page in desktop Chrome and use Website Citation to collect its citation details.'],
@@ -258,6 +261,8 @@ const offerCopy = {
 };
 let offerSeen = false;
 let offerTrigger;
+let offerViewport;
+let copyOfferInterrupted = false;
 try {
   offerSeen = sessionStorage.getItem(offerKey) === '1';
 } catch {}
@@ -269,19 +274,108 @@ function suppressOffer() {
   } catch {}
 }
 
-function dismissAutoOffer() {
-  if (autoOffer.contains(document.activeElement)) {
-    const focusTarget = copyButton.disabled ? document.querySelector('[data-offer="library"]') : copyButton;
-    focusTarget.focus({ preventScroll: true });
-  }
+function dismissAutoOffer(restoreFocus = false) {
+  if (autoOffer.hidden) return;
+  const returnToCopy = restoreFocus && autoOffer.contains(document.activeElement);
   autoOffer.hidden = true;
   announcement.textContent = '';
+  if (returnToCopy) copyButton.focus({ preventScroll: true });
+}
+
+function readViewport() {
+  return {
+    left: visualViewport?.offsetLeft ?? 0,
+    top: visualViewport?.offsetTop ?? 0,
+    width: visualViewport?.width ?? document.documentElement.clientWidth,
+    height: visualViewport?.height ?? document.documentElement.clientHeight,
+    pageLeft: visualViewport?.pageLeft ?? window.scrollX,
+    pageTop: visualViewport?.pageTop ?? window.scrollY,
+  };
+}
+
+function sameScroll(first, second) {
+  return first.pageLeft === second.pageLeft && first.pageTop === second.pageTop;
+}
+
+function showAutoOffer(viewport) {
+  const gap = 12;
+  const margin = 8;
+  const copy = copyButton.getBoundingClientRect();
+  const left = Math.max(copy.left, viewport.left + margin);
+  const right = Math.min(copy.right, viewport.left + viewport.width - margin);
+  const top = viewport.top + margin;
+  const bottom = viewport.top + viewport.height - margin;
+  const upperEdge = Math.min(copy.top - gap, bottom);
+  const above = upperEdge - top;
+  const sourceRect = source.getBoundingClientRect();
+  const overlapsSource = left < sourceRect.right && right > sourceRect.left;
+  const lowerEdge = Math.max(copy.bottom + (overlapsSource ? 8 : gap), top);
+  const lowerLimit = overlapsSource ? Math.min(bottom, sourceRect.top - gap) : bottom;
+  const below = lowerLimit - lowerEdge;
+  const placeAbove = above > below;
+  const space = Math.max(above, below);
+  if (left >= right || space <= 0) return;
+
+  autoOffer.style.setProperty('--offer-left', left + 'px');
+  autoOffer.style.setProperty('--offer-width', (right - left) + 'px');
+  autoOffer.style.setProperty('--offer-edge', (placeAbove ? upperEdge : lowerEdge) + 'px');
+  autoOffer.style.setProperty('--offer-space', space + 'px');
+  autoOffer.dataset.placement = placeAbove ? 'above' : 'below';
+  autoOffer.toggleAttribute('data-compact', space < 220);
+  autoOffer.hidden = false;
+
+  const card = autoOffer.getBoundingClientRect();
+  const actions = [byId('close-auto-offer'), autoOffer.querySelector('.offer-actions a'), byId('continue-auto-offer')]
+    .map((action) => action.getBoundingClientRect());
+  const actionsDoNotFit = actions.some((action, index) => (
+    action.left < card.left || action.right > card.right || action.top < card.top || action.bottom > card.bottom
+    || actions.slice(0, index).some((other) => (
+      action.left < other.right && action.right > other.left && action.top < other.bottom && action.bottom > other.top
+    ))
+  ));
+  if (actionsDoNotFit) {
+    autoOffer.hidden = true;
+    return;
+  }
+
+  offerViewport = viewport;
+  offerContent.tabIndex = offerContent.scrollHeight > offerContent.clientHeight ? 0 : -1;
   suppressOffer();
+  announcement.textContent = 'Cite as you browse. ' + offerContent.querySelector('p').textContent;
+}
+
+function handleOutsideOffer({ target }) {
+  if (autoOffer.contains(target)) return;
+  if (copyPending && target !== copyButton) copyOfferInterrupted = true;
+  dismissAutoOffer();
+}
+
+function dismissOnViewportChange() {
+  if (autoOffer.hidden) return;
+  const viewport = readViewport();
+  if (sameScroll(offerViewport, viewport) && offerViewport.width === viewport.width && offerViewport.height === viewport.height) return;
+  const { left, right, top, bottom } = copyButton.getBoundingClientRect();
+  const copyInView = left >= viewport.left && right <= viewport.left + viewport.width
+    && top >= viewport.top && bottom <= viewport.top + viewport.height;
+  dismissAutoOffer(copyInView);
 }
 
 for (const id of ['close-auto-offer', 'continue-auto-offer']) {
-  byId(id).addEventListener('click', dismissAutoOffer);
+  byId(id).addEventListener('click', () => dismissAutoOffer(true));
 }
+document.addEventListener('pointerdown', handleOutsideOffer, { capture: true });
+document.addEventListener('focusin', handleOutsideOffer);
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  if (copyPending) copyOfferInterrupted = true;
+  if (autoOffer.hidden) return;
+  event.preventDefault();
+  dismissAutoOffer(true);
+});
+window.addEventListener('scroll', dismissOnViewportChange);
+window.addEventListener('resize', dismissOnViewportChange);
+visualViewport?.addEventListener('scroll', dismissOnViewportChange);
+visualViewport?.addEventListener('resize', dismissOnViewportChange);
 
 for (const button of document.querySelectorAll('[data-offer]')) {
   button.addEventListener('click', () => {
@@ -289,9 +383,8 @@ for (const button of document.querySelectorAll('[data-offer]')) {
     const [heading, body] = offerCopy[button.dataset.offer];
     byId('offer-title').textContent = heading;
     byId('offer-body').textContent = body;
+    dismissAutoOffer();
     dialog.showModal();
-    autoOffer.hidden = true;
-    announcement.textContent = '';
   });
 }
 
@@ -328,14 +421,15 @@ async function writeCitation({ html, text }) {
 copyButton.addEventListener('click', async () => {
   if (copyPending || !currentCitation) return;
   const copied = currentCitation;
+  const initialViewport = readViewport();
+  copyOfferInterrupted = false;
   copyPending = true;
   try {
     await writeCitation(copied);
     reportCopy(copied === currentCitation ? 'Citation copied.' : 'Previous citation copied.');
-    if (!offerSeen && !dialog.open) {
-      suppressOffer();
-      autoOffer.hidden = false;
-      announcement.textContent = 'Cite as you browse. ' + autoOffer.querySelector('p').textContent;
+    if (!offerSeen && !dialog.open && !copyOfferInterrupted && copied === currentCitation) {
+      const viewport = readViewport();
+      if (sameScroll(initialViewport, viewport)) showAutoOffer(viewport);
     }
   } catch {
     reportCopy('Couldn’t copy the citation. Please try again.', true);

@@ -60,27 +60,34 @@
               </div>
             </fieldset>
             </div>
-            <div id="intext-options" class="intext-options" hidden>
-              <fieldset class="choice-group">
-                <legend>Citation form</legend>
-                <div class="segmented">
-                  <label><input type="radio" name="form" value="parenthetical" checked><span>Parenthetical</span></label>
-                  <label><input type="radio" name="form" value="narrative"><span>Narrative</span></label>
-                </div>
-              </fieldset>
-            </div>
-            <div class="citation-sheet">
-              <p class="result-label" id="result-label">Reference</p>
-              <p id="citation" class="citation empty">Your citation will appear here as you enter the source details.</p>
+            <div class="result-body">
+              <div id="intext-options" class="intext-options" hidden>
+                <fieldset class="choice-group">
+                  <legend>Citation form</legend>
+                  <div class="segmented">
+                    <label><input type="radio" name="form" value="parenthetical" checked><span>Parenthetical</span></label>
+                    <label><input type="radio" name="form" value="narrative"><span>Narrative</span></label>
+                  </div>
+                </fieldset>
+              </div>
+              <div class="citation-sheet">
+                <p class="result-label" id="result-label">Reference</p>
+                <p id="citation" class="citation empty">Your citation will appear here as you enter the source details.</p>
+              </div>
             </div>
             <button class="button primary copy-button" id="copy" type="button" disabled>Copy citation</button>
             <p class="status" id="copy-status" role="status"></p>
             <p class="result-help" id="result-help">Use this full entry in your reference list. In MLA, add it to your Works Cited list.</p>
             <aside class="auto-offer" id="auto-offer" aria-labelledby="auto-offer-title" hidden>
-              <div class="offer-head"><h2 id="auto-offer-title">Cite as you browse</h2><button class="offer-close" type="button" id="close-auto-offer" aria-label="Close">×</button></div>
-              <p>With Website Citation, you can collect citation details from the page you’re viewing in Chrome.</p>
-              <a class="button primary" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
-              <button class="offer-continue" type="button" id="continue-auto-offer">Continue on website</button>
+              <button class="offer-close" type="button" id="close-auto-offer" aria-label="Close">×</button>
+              <div class="offer-content">
+                <h2 id="auto-offer-title">Cite as you browse</h2>
+                <p>With Website Citation, you can collect citation details from the page you’re viewing in Chrome.</p>
+              </div>
+              <div class="offer-actions">
+                <a class="button primary" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
+                <button class="offer-continue" type="button" id="continue-auto-offer">Continue on website</button>
+              </div>
             </aside>
             <button class="context-action result-action" type="button" data-offer="library">Save in extension library</button>
           </div>
