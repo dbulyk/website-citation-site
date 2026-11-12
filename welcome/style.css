@@ -59,32 +59,8 @@ body {
 
 .language-switch {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
   max-inline-size: 100%;
   margin-inline-start: auto;
-}
-
-.language-switch label {
-  color: #dfe6f1;
-  font-size: 14px;
-}
-
-.language-switch select {
-  min-inline-size: 44px;
-  max-inline-size: 100%;
-  min-block-size: 44px;
-  padding-block: 8px;
-  padding-inline: 12px;
-  border: 1px solid #c6ceda;
-  border-radius: 6px;
-  background: white;
-  color: var(--ink);
-  font: inherit;
-}
-
-.language-switch select:focus-visible {
-  outline-color: var(--gold);
 }
 
 h1,
@@ -315,7 +291,6 @@ h2 {
 
   .language-switch {
     flex-basis: 100%;
-    align-items: flex-start;
     margin-inline-start: 0;
   }
 

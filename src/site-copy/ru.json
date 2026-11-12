@@ -122,7 +122,5 @@
   "demo.saved_example": "Сохранённый пример",
   "demo.sample_preview": "Предпросмотр примера",
   "demo.note": "Это только демонстрация · Страница не считывается, и в вашу библиотеку ничего не сохраняется.",
-  "language.label": "Язык",
-  "language.english": "English",
-  "language.russian": "Русский"
+  "language.label": "Язык"
 }

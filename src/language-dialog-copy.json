@@ -1,0 +1,170 @@
+{
+  "ar": {
+    "choose_language": "اختر اللغة",
+    "search_languages": "ابحث عن لغة",
+    "no_languages_found": "لم يتم العثور على لغات",
+    "close": "إغلاق"
+  },
+  "de": {
+    "choose_language": "Sprache auswählen",
+    "search_languages": "Sprache suchen",
+    "no_languages_found": "Keine Sprachen gefunden",
+    "close": "Schließen"
+  },
+  "el": {
+    "choose_language": "Επιλογή γλώσσας",
+    "search_languages": "Αναζήτηση γλώσσας",
+    "no_languages_found": "Δεν βρέθηκαν γλώσσες",
+    "close": "Κλείσιμο"
+  },
+  "en": {
+    "choose_language": "Choose language",
+    "search_languages": "Search languages",
+    "no_languages_found": "No languages found",
+    "close": "Close"
+  },
+  "es": {
+    "choose_language": "Elegir idioma",
+    "search_languages": "Buscar idiomas",
+    "no_languages_found": "No se encontraron idiomas",
+    "close": "Cerrar"
+  },
+  "et": {
+    "choose_language": "Vali keel",
+    "search_languages": "Otsi keeli",
+    "no_languages_found": "Keeli ei leitud",
+    "close": "Sulge"
+  },
+  "fi": {
+    "choose_language": "Valitse kieli",
+    "search_languages": "Hae kieliä",
+    "no_languages_found": "Kieliä ei löytynyt",
+    "close": "Sulje"
+  },
+  "fil": {
+    "choose_language": "Pumili ng wika",
+    "search_languages": "Maghanap ng wika",
+    "no_languages_found": "Walang nakitang wika",
+    "close": "Isara"
+  },
+  "fr": {
+    "choose_language": "Choisir une langue",
+    "search_languages": "Rechercher une langue",
+    "no_languages_found": "Aucune langue trouvée",
+    "close": "Fermer"
+  },
+  "hi": {
+    "choose_language": "भाषा चुनें",
+    "search_languages": "भाषाएँ खोजें",
+    "no_languages_found": "कोई भाषा नहीं मिली",
+    "close": "बंद करें"
+  },
+  "hr": {
+    "choose_language": "Odaberite jezik",
+    "search_languages": "Pretraži jezike",
+    "no_languages_found": "Nije pronađen nijedan jezik",
+    "close": "Zatvori"
+  },
+  "hu": {
+    "choose_language": "Nyelv kiválasztása",
+    "search_languages": "Nyelvek keresése",
+    "no_languages_found": "Nem található nyelv",
+    "close": "Bezárás"
+  },
+  "id": {
+    "choose_language": "Pilih bahasa",
+    "search_languages": "Cari bahasa",
+    "no_languages_found": "Bahasa tidak ditemukan",
+    "close": "Tutup"
+  },
+  "it": {
+    "choose_language": "Scegli la lingua",
+    "search_languages": "Cerca lingue",
+    "no_languages_found": "Nessuna lingua trovata",
+    "close": "Chiudi"
+  },
+  "ja": {
+    "choose_language": "言語を選択",
+    "search_languages": "言語を検索",
+    "no_languages_found": "言語が見つかりません",
+    "close": "閉じる"
+  },
+  "ko": {
+    "choose_language": "언어 선택",
+    "search_languages": "언어 검색",
+    "no_languages_found": "검색된 언어가 없습니다",
+    "close": "닫기"
+  },
+  "nl": {
+    "choose_language": "Kies een taal",
+    "search_languages": "Talen zoeken",
+    "no_languages_found": "Geen talen gevonden",
+    "close": "Sluiten"
+  },
+  "no": {
+    "choose_language": "Velg språk",
+    "search_languages": "Søk etter språk",
+    "no_languages_found": "Ingen språk funnet",
+    "close": "Lukk"
+  },
+  "pl": {
+    "choose_language": "Wybierz język",
+    "search_languages": "Szukaj języków",
+    "no_languages_found": "Nie znaleziono języków",
+    "close": "Zamknij"
+  },
+  "pt_BR": {
+    "choose_language": "Escolher idioma",
+    "search_languages": "Buscar idiomas",
+    "no_languages_found": "Nenhum idioma encontrado",
+    "close": "Fechar"
+  },
+  "pt_PT": {
+    "choose_language": "Escolher idioma",
+    "search_languages": "Pesquisar idiomas",
+    "no_languages_found": "Nenhum idioma encontrado",
+    "close": "Fechar"
+  },
+  "ru": {
+    "choose_language": "Выберите язык",
+    "search_languages": "Поиск языков",
+    "no_languages_found": "Языки не найдены",
+    "close": "Закрыть"
+  },
+  "sv": {
+    "choose_language": "Välj språk",
+    "search_languages": "Sök språk",
+    "no_languages_found": "Inga språk hittades",
+    "close": "Stäng"
+  },
+  "th": {
+    "choose_language": "เลือกภาษา",
+    "search_languages": "ค้นหาภาษา",
+    "no_languages_found": "ไม่พบภาษา",
+    "close": "ปิด"
+  },
+  "tr": {
+    "choose_language": "Dil seçin",
+    "search_languages": "Dil ara",
+    "no_languages_found": "Dil bulunamadı",
+    "close": "Kapat"
+  },
+  "uk": {
+    "choose_language": "Виберіть мову",
+    "search_languages": "Пошук мов",
+    "no_languages_found": "Мов не знайдено",
+    "close": "Закрити"
+  },
+  "vi": {
+    "choose_language": "Chọn ngôn ngữ",
+    "search_languages": "Tìm ngôn ngữ",
+    "no_languages_found": "Không tìm thấy ngôn ngữ",
+    "close": "Đóng"
+  },
+  "zh_CN": {
+    "choose_language": "选择语言",
+    "search_languages": "搜索语言",
+    "no_languages_found": "未找到语言",
+    "close": "关闭"
+  }
+}

@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
 
-const language = (page) => page.locator('header').getByRole('combobox');
+const language = (page) => page.locator('header').getByRole('button', { name: /^(Language|Язык): / });
+
+async function chooseLanguage(page, name) {
+  await language(page).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name }).click();
+  await expect(dialog).not.toBeVisible();
+}
 
 async function expectLocale(page, lang) {
   await expect(page.locator('html')).toHaveAttribute('lang', lang);
@@ -9,20 +17,24 @@ async function expectLocale(page, lang) {
 
 test('homepage language control offers only English and Russian and preserves citation state', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const control = page.getByRole('combobox', { name: 'Language', exact: true });
+  const control = page.getByRole('button', { name: 'Language: English', exact: true });
   await expect(control).toBeVisible();
-  await expect(control).toHaveJSProperty('tagName', 'SELECT');
-  await expect(control.locator('option')).toHaveText(['English', 'Русский']);
-  expect((await control.locator('option').evaluateAll(options => options.map(option => option.value))).sort()).toEqual(['en', 'ru']);
+  await control.click();
+  const dialog = page.getByRole('dialog', { name: 'Choose language' });
+  await expect(dialog.getByRole('button', { pressed: true })).toHaveCount(1);
+  await expect(dialog.getByRole('button', { name: /English/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(dialog.locator('button[aria-pressed]')).toHaveCount(2);
+  await expect(dialog.getByRole('searchbox')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click();
   await page.locator('#title').fill('My edited source title');
   await page.locator('#url').fill('https://example.org/custom-source');
   await page.getByRole('radio', { name: 'MLA 9', exact: true }).check();
   await page.getByRole('radio', { name: 'In-text', exact: true }).check();
   await page.getByRole('radio', { name: 'Narrative', exact: true }).check();
   const citation = await page.locator('#citation').innerHTML();
-  await control.selectOption('ru');
+  await chooseLanguage(page, /Русский/);
   await expectLocale(page, 'ru');
-  await expect(page.getByRole('combobox', { name: 'Язык', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Язык: Русский', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Цитирование сайта', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
   await expect(page.locator('#url')).toHaveValue('https://example.org/custom-source');
@@ -30,7 +42,7 @@ test('homepage language control offers only English and Russian and preserves ci
   await expect(page.getByRole('radio', { name: 'В тексте', exact: true })).toBeChecked();
   await expect(page.getByRole('radio', { name: 'В тексте предложения', exact: true })).toBeChecked();
   expect(await page.locator('#citation').innerHTML()).toBe(citation);
-  await language(page).selectOption('en');
+  await chooseLanguage(page, /English/);
   await expectLocale(page, 'en');
   await expect(page.getByRole('heading', { name: 'Cite a website', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
@@ -44,7 +56,7 @@ test('Russian translates validation, clipboard feedback and the extension dialog
     } });
   });
   await page.goto('/?lang=ru', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('combobox', { name: 'Язык', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Язык: Русский', exact: true })).toBeVisible();
   await expectLocale(page, 'ru');
   await page.locator('#url').fill('not-a-url');
   await expect(page.locator('#url-error')).toHaveText('Введите корректный URL страницы, включая https:// или http://.');
@@ -59,17 +71,17 @@ test('Russian translates validation, clipboard feedback and the extension dialog
 
 test('embedded demo follows homepage language without translating fictional source metadata', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const control = page.getByRole('combobox', { name: 'Language', exact: true });
+  const control = page.getByRole('button', { name: 'Language: English', exact: true });
   await expect(control).toBeVisible();
   const demo = page.frameLocator('iframe.walkthrough-frame');
   await expect(demo.getByText('Interactive demo', { exact: true })).toBeVisible();
   const articleText = await demo.locator('.cw-article-body').innerText();
-  await control.selectOption('ru');
+  await chooseLanguage(page, /Русский/);
   await expect(demo.getByText('Интерактивная демонстрация', { exact: true })).toBeVisible();
   await expect(demo.getByRole('button', { name: 'Цитировать эту страницу', exact: true })).toBeVisible();
   await expect(demo.locator('.cw-article-body')).toContainText('Maya Bennett');
   expect(await demo.locator('.cw-article-body').innerText()).toContain(articleText.replace('By Maya Bennett', '').trim());
-  await language(page).selectOption('en');
+  await chooseLanguage(page, /English/);
   await expect(demo.getByText('Interactive demo', { exact: true })).toBeVisible();
   await expect(demo.locator('.cw-article-body')).toHaveText(articleText);
 });

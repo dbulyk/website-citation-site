@@ -1,4 +1,4 @@
-import languageNames from './native-language-names.json';
+import { mountLanguageDialog } from '../src/language-dialog.js';
 
 const dictionaries = import.meta.glob('./locales/*.json', { eager: true, import: 'default' });
 
@@ -33,30 +33,16 @@ export function localize({ locale, copy }, titleKey) {
 }
 
 export function bindLanguageSelector(initialContext, titleKey, onLocaleChange) {
-  const select = document.querySelector('#language');
-  for (const [locale, name] of Object.entries(languageNames)) {
-    const option = document.createElement('option');
-    option.value = locale;
-    option.textContent = name;
-    option.lang = locale.replace('_', '-');
-    option.dir = 'auto';
-    select.append(option);
-  }
-
   function render(context) {
     localize(context, titleKey);
     onLocaleChange(context);
   }
 
-  select.value = initialContext.locale;
   render(initialContext);
-  select.addEventListener('change', () => {
-    const locale = select.value;
-    if (!Object.hasOwn(languageNames, locale)) return;
-    const url = new URL(location.href);
-    url.searchParams.set('lang', locale);
-    history.replaceState(history.state, '', url);
-    render(readContext());
+  mountLanguageDialog(document.querySelector('#language'), {
+    locale: initialContext.locale,
+    getLabel: (locale) => dictionaries[`./locales/${locale}.json`].language_label,
+    onChange: () => render(readContext()),
   });
 }
 

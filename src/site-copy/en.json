@@ -122,7 +122,5 @@
   "demo.saved_example": "Saved example",
   "demo.sample_preview": "Sample preview",
   "demo.note": "Simulation only · No page is read and nothing is saved to your library.",
-  "language.label": "Language",
-  "language.english": "English",
-  "language.russian": "Русский"
+  "language.label": "Language"
 }

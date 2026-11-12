@@ -3,6 +3,10 @@ import ru from './site-copy/ru.json';
 
 const dictionaries = { en, ru };
 
+export function getSiteLanguageLabel(language) {
+  return dictionaries[language]['language.label'];
+}
+
 function writeText(element, dictionary) {
   const { siteCopy, siteNumber } = element.dataset;
   const template = siteCopy ? dictionary[siteCopy] : '';

@@ -1,5 +1,6 @@
 import { formatCitation } from './formatter.js';
-import { applySiteCopy, setSiteCopy } from './site-language.js';
+import { applySiteCopy, getSiteLanguageLabel, setSiteCopy } from './site-language.js';
+import { mountLanguageDialog } from './language-dialog.js';
 
 const byId = (id) => document.getElementById(id);
 const source = byId('source-details');
@@ -285,7 +286,7 @@ closeCopyOffer.addEventListener('click', () => {
   dismissCopyOffer();
 });
 document.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape' || dialog.open) return;
+  if (event.key !== 'Escape' || document.querySelector('dialog:modal')) return;
   dismissCopyOffer();
 });
 
@@ -349,7 +350,6 @@ copyButton.addEventListener('click', async () => {
   }
 });
 
-const languageSelect = byId('site-language');
 const walkthrough = document.querySelector('.walkthrough-frame');
 
 function localizeWalkthrough() {
@@ -366,15 +366,14 @@ function setLanguage(language) {
   localizeWalkthrough();
 }
 
-languageSelect.value = new URL(location.href).searchParams.get('lang') === 'ru' ? 'ru' : 'en';
+const initialLanguage = new URL(location.href).searchParams.get('lang') === 'ru' ? 'ru' : 'en';
 walkthrough.addEventListener('load', localizeWalkthrough);
-setLanguage(languageSelect.value);
-languageSelect.addEventListener('change', () => {
-  const language = languageSelect.value === 'ru' ? 'ru' : 'en';
-  const url = new URL(location.href);
-  url.searchParams.set('lang', language);
-  history.replaceState(history.state, '', url);
-  setLanguage(language);
+setLanguage(initialLanguage);
+mountLanguageDialog(byId('site-language'), {
+  locale: initialLanguage,
+  locales: ['en', 'ru'],
+  getLabel: getSiteLanguageLabel,
+  onChange: setLanguage,
 });
 
 selectExample('person');
