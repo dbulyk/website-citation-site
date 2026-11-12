@@ -1,12 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=./uninstall/" />
-  <title>Website Citation</title>
-  <link rel="canonical" href="./uninstall/" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#eef1f5">
+  <title>Website Citation — Cite a website</title>
+  <link rel="icon" type="image/png" href="assets/icon-128.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="./src/app.js"></script>
 </head>
 <body>
-  <p><a href="./uninstall/">Website Citation uninstall feedback</a></p>
+  <a class="skip-link" href="#source-details">Skip to source details</a>
+  <header class="site-header frame">
+    <a class="brand" href="#top" aria-label="Website Citation home">
+      <img src="assets/icon-128.png" width="42" height="42" alt="">
+      <span>Website Citation</span>
+    </a>
+    <nav aria-label="Main navigation"><a href="#examples">Try an example</a><a class="nav-how" href="#how-it-works">How it works</a></nav>
+  </header>
+
+  <main id="top">
+    <section class="intro frame" aria-labelledby="page-title">
+      <h1 id="page-title">Cite a website</h1>
+      <p>Start with a ready-to-copy example citation in APA 7 or MLA 9, and edit the details if you like.</p>
+      <div class="install">
+        <a class="button primary install-first" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
+        <p class="install-note">15 reference styles in the Chrome extension.</p>
+      </div>
+    </section>
+
+    <section class="workspace frame" aria-labelledby="tool-title" data-ui>
+      <h2 class="visually-hidden" id="tool-title">Website citation</h2>
+      <div class="work-grid">
+        <div class="example-area">
+          <p class="example-label">Fictional examples</p>
+          <div class="example-picker" id="examples" role="group" aria-label="Fictional examples" aria-controls="source-details">
+            <button type="button" data-example="person" aria-pressed="true">Person</button>
+            <button type="button" data-example="organization" aria-pressed="false">Organization</button>
+            <button type="button" data-example="none" aria-pressed="false">No author or date</button>
+          </div>
+        </div>
+
+        <div class="result-column">
+          <div class="result-sticky">
+            <div class="result-heading"><h3>Your citation</h3><span id="result-style">APA 7</span></div>
+            <div class="result-switches">
+            <fieldset class="choice-group style-choice">
+              <legend>Citation style</legend>
+              <div class="segmented">
+                <label><input type="radio" name="style" value="apa" checked><span>APA 7</span></label>
+                <label><input type="radio" name="style" value="mla"><span>MLA 9</span></label>
+              </div>
+            </fieldset>
+            <fieldset class="choice-group output-choice">
+              <legend>Result</legend>
+              <div class="segmented">
+                <label><input type="radio" name="mode" value="reference" checked><span>Reference</span></label>
+                <label><input type="radio" name="mode" value="intext"><span>In-text</span></label>
+              </div>
+            </fieldset>
+            </div>
+            <div id="intext-options" class="intext-options" hidden>
+              <fieldset class="choice-group">
+                <legend>Citation form</legend>
+                <div class="segmented">
+                  <label><input type="radio" name="form" value="parenthetical" checked><span>Parenthetical</span></label>
+                  <label><input type="radio" name="form" value="narrative"><span>Narrative</span></label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="citation-sheet">
+              <p class="result-label" id="result-label">Reference</p>
+              <p id="citation" class="citation empty">Your citation will appear here as you enter the source details.</p>
+            </div>
+            <button class="button primary copy-button" id="copy" type="button" disabled>Copy citation</button>
+            <p class="status" id="copy-status" role="status"></p>
+            <p class="result-help" id="result-help">Use this full entry in your reference list. In MLA, add it to your Works Cited list.</p>
+            <aside class="auto-offer" id="auto-offer" aria-labelledby="auto-offer-title" hidden>
+              <div class="offer-head"><h2 id="auto-offer-title">Cite as you browse</h2><button class="offer-close" type="button" id="close-auto-offer" aria-label="Close">×</button></div>
+              <p>With Website Citation, you can collect citation details from the page you’re viewing in Chrome.</p>
+              <a class="button primary" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
+              <button class="offer-continue" type="button" id="continue-auto-offer">Continue on website</button>
+            </aside>
+            <button class="context-action result-action" type="button" data-offer="library">Save in extension library</button>
+          </div>
+        </div>
+
+        <form id="source-details" class="source-form" novalidate>
+          <div class="form-heading"><h3>Source details</h3><p>Start with a fictional example, or edit the source details below.</p></div>
+          <div class="field-stack">
+            <div class="field">
+              <label for="url">Website URL <span class="required" aria-hidden="true">*</span></label>
+              <input id="url" name="url" type="url" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="https://example.com/page" aria-describedby="url-help url-error" required>
+              <small id="url-help">Enter the address of the page you’re citing.</small>
+              <small class="error" id="url-error"></small>
+            </div>
+            <button class="context-action" type="button" data-offer="capture">Capture details with the extension</button>
+            <div class="field">
+              <label for="title">Page title <span class="required" aria-hidden="true">*</span></label>
+              <input id="title" name="title" type="text" placeholder="Title of the page" aria-describedby="title-error" required>
+              <small class="error" id="title-error"></small>
+            </div>
+            <label class="field" for="website"><span>Website name <span class="optional">(optional)</span></span><input id="website" name="website" type="text" placeholder="Name of the website"></label>
+            <fieldset class="choice-group author-row" id="first-author">
+              <legend>Author</legend>
+              <div class="segmented three">
+                <label><input type="radio" name="authorType" value="person" checked><span>Person</span></label>
+                <label><input type="radio" name="authorType" value="organization"><span>Organization</span></label>
+                <label><input type="radio" name="authorType" value="none"><span>No author</span></label>
+              </div>
+              <div class="name-grid" data-person-fields>
+                <label class="field"><span>First name</span><input id="first" data-given type="text" autocomplete="off"></label>
+                <label class="field"><span>Last name</span><input id="last" data-family type="text" autocomplete="off" aria-describedby="author-error"></label>
+              </div>
+              <label class="field" data-organization-field hidden><span>Organization name</span><input id="organization" data-organization type="text" aria-describedby="author-error"></label>
+              <small class="error" id="author-error"></small>
+              <button class="context-action remove-author" id="remove-first-author" type="button" hidden>Remove author 1</button>
+            </fieldset>
+            <fieldset class="choice-group date-group">
+              <legend>Publication date</legend>
+              <div class="date-grid" id="publication-date">
+                <label class="field"><span>Year</span><input id="year" type="text" inputmode="numeric" aria-describedby="date-error"></label>
+                <label class="field"><span>Month</span><input id="month" type="text" inputmode="numeric" aria-describedby="date-error"></label>
+                <label class="field"><span>Day</span><input id="day" type="text" inputmode="numeric" aria-describedby="date-error"></label>
+              </div>
+              <label class="checkbox"><input type="checkbox" id="no-date" name="noDate"><span>No date</span></label>
+              <small class="error" id="date-error"></small>
+            </fieldset>
+            <details class="source-extra">
+              <summary>Additional source details (optional)</summary>
+              <div class="field-stack">
+                <div class="field-stack" id="more-authors">
+                  <div class="field-stack" id="extra-authors" hidden></div>
+                  <button class="context-action" id="add-author" type="button">Add author</button>
+                </div>
+                <label class="field"><span>Publisher</span><input id="publisher" type="text"></label>
+                <div class="field">
+                  <label for="access-date">Access date</label>
+                  <input id="access-date" type="date" aria-describedby="access-date-help access-date-error">
+                  <small id="access-date-help">Include an access date for unarchived sources that change over time.</small>
+                  <small class="error" id="access-date-error"></small>
+                </div>
+                <div class="name-grid" id="locator-fields" hidden>
+                  <label class="field"><span>Locator type</span><select id="locator-type"><option value="page">Page</option><option value="paragraph">Paragraph</option><option value="section">Section</option></select></label>
+                  <label class="field"><span>Locator</span><input id="locator" name="locator" type="text" placeholder="e.g., 3"></label>
+                </div>
+              </div>
+            </details>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="how content-section frame" id="how-it-works" aria-labelledby="how-title">
+      <h2 id="how-title">How to cite a website</h2>
+      <ol class="steps">
+        <li><h3>Choose an example.</h3><p>Pick a fictional source and edit its details if you like.</p></li>
+        <li><h3>Choose a style.</h3><p>Select APA 7 or MLA 9, then choose Reference or In-text.</p></li>
+        <li><h3>Copy your citation.</h3><p>Add it to your reference list or use it in your text.</p></li>
+      </ol>
+    </section>
+
+    <section class="extension" aria-labelledby="extension-title">
+      <div class="extension-inner frame"><h2 id="extension-title">Cite the page you’re viewing</h2><div><p>With the Website Citation Chrome extension, you can collect citation details from the page open in your browser.</p><a class="button gold" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a></div></div>
+    </section>
+  </main>
+  <footer class="site-footer frame"><strong>Website Citation</strong><p>Entered citation details stay in this browser.</p><div><a href="mailto:dmbulyk+support@gmail.com">Support</a><a href="https://docs.google.com/document/d/1qihvEWdgnKgFiPWnSBwOL1JDk_KgpdsQBZePNgwm4As/edit?usp=sharing">Extension privacy</a><a href="./credits/">Credits and source</a></div></footer>
+  <dialog class="install-dialog" id="install-dialog" aria-labelledby="offer-title" aria-describedby="offer-body">
+    <form method="dialog">
+      <div class="offer-head"><h2 id="offer-title"></h2><button class="offer-close" type="submit" autofocus aria-label="Close">×</button></div>
+      <p id="offer-body"></p>
+      <a class="button primary" href="https://chromewebstore.google.com/detail/bgnhgjohgkcmdiaeggjnegfkhmgkjbob" target="_blank" rel="noopener noreferrer">Get the Chrome extension</a>
+      <button class="offer-continue" type="submit">Continue on website</button>
+    </form>
+  </dialog>
+  <p class="visually-hidden" id="auto-offer-announcement" role="status"></p>
+  <template id="author-template">
+    <fieldset class="choice-group author-row">
+      <legend></legend>
+      <label class="field"><span>Author type</span><select data-author-type><option value="person">Person</option><option value="organization">Organization</option></select></label>
+      <div class="name-grid" data-person-fields>
+        <label class="field"><span>First name</span><input data-given type="text" autocomplete="off"></label>
+        <label class="field"><span>Last name</span><input data-family type="text" autocomplete="off"></label>
+      </div>
+      <label class="field" data-organization-field hidden><span>Organization name</span><input data-organization type="text"></label>
+      <small class="error" data-author-error></small>
+      <button class="context-action remove-author" type="button" data-remove-author></button>
+    </fieldset>
+  </template>
+  <noscript><p class="noscript">Turn on JavaScript to create and copy a citation.</p></noscript>
 </body>
 </html>
