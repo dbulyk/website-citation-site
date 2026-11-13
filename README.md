@@ -29,7 +29,7 @@ The uninstall feedback page uses the [existing Google Form](https://docs.google.
 
 ## Production deployment
 
-[Site checks and deploy](.github/workflows/deploy.yml) runs the unit and browser tests on pull requests to `main`. A push to `main` also publishes the tested build to [citewebsite.app](https://citewebsite.app/). For a manual deployment, open the workflow in GitHub Actions and choose **Run workflow** on `main`. A run for an older commit skips the transfer if `main` has moved on.
+[Site checks and deploy](.github/workflows/deploy.yml) runs the unit and browser tests on pull requests to `main`. A push to `main` also publishes the tested build to [citewebsite.app](https://citewebsite.app/). For a manual deployment, open the workflow in GitHub Actions and choose **Run workflow** on `main`. At the start of the deployment job, the workflow skips the transfer if the tested commit differs from the current head of `main`.
 
 In GitHub, restrict the `production` environment to the `main` branch and set its `CITEWEBSITE_DEPLOY_KEY` secret to the dedicated deployment private key. Set these repository variables.
 
