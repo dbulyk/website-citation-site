@@ -1,0 +1,119 @@
+name: Site checks and deploy
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    if: github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - name: Build and test the site
+        run: npm run test:e2e
+      - name: Save the tested site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: site-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://citewebsite.app/
+    concurrency:
+      group: citewebsite-production
+      cancel-in-progress: false
+      queue: max
+    steps:
+      - name: Check the deployment is for current main
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          main_sha=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [[ "$GITHUB_SHA" == "$main_sha" ]]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::This build is superseded by a newer main commit."
+          fi
+      - name: Get the tested site
+        if: steps.release.outputs.current == 'true'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: site-dist
+          path: dist
+      - name: Upload the site
+        if: steps.release.outputs.current == 'true'
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.CITEWEBSITE_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ vars.CITEWEBSITE_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.CITEWEBSITE_DEPLOY_USER }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.CITEWEBSITE_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          : "${DEPLOY_KEY:?Missing CITEWEBSITE_DEPLOY_KEY}"
+          : "${DEPLOY_HOST:?Missing CITEWEBSITE_DEPLOY_HOST}"
+          : "${DEPLOY_USER:?Missing CITEWEBSITE_DEPLOY_USER}"
+          : "${DEPLOY_KNOWN_HOSTS:?Missing CITEWEBSITE_DEPLOY_KNOWN_HOSTS}"
+
+          umask 077
+          ssh_dir=$(mktemp -d /tmp/citewebsite-deploy.XXXXXXXXXX)
+          trap 'rm -rf -- "$ssh_dir"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$ssh_dir/key"
+          unset DEPLOY_KEY
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          export RSYNC_RSH="ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=$ssh_dir/known_hosts -o ConnectTimeout=10 -i $ssh_dir/key"
+
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          transfer=(rsync -rp --checksum --chmod=D755,F644 --delay-updates)
+          "${transfer[@]}" -- dist/assets/ "$target:assets/"
+          "${transfer[@]}" --exclude='/assets/' -- dist/ "$target:."
+      - name: Verify the published build over HTTPS
+        if: steps.release.outputs.current == 'true'
+        shell: bash
+        run: |
+          response=$(mktemp)
+          trap 'rm -f -- "$response"' EXIT
+
+          verify() {
+            local route=$1 expected=$2
+            curl --fail --silent --show-error --compressed --proto '=https' \
+              --max-time 20 --retry 2 --retry-max-time 60 --output "$response" \
+              "https://citewebsite.app$route?deploy=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            if ! cmp -s "$expected" "$response"; then
+              echo "::error::Published bytes differ from the tested build at $route"
+              return 1
+            fi
+          }
+
+          verify / dist/index.html
+          verify /welcome/ dist/welcome/index.html
+          for asset in dist/assets/*; do
+            verify "/${asset#dist/}" "$asset"
+          done
