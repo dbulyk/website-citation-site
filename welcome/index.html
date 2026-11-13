@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get started with Website Citation</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./guide.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="brand-row">
+        <div class="brand"><img src="./icon.png" alt="" width="24" height="24"> Website Citation</div>
+        <div class="language-switch">
+          <button id="language" class="language-trigger" type="button" aria-haspopup="dialog"></button>
+        </div>
+      </div>
+      <h1 data-copy="guide_title">Get started with Website Citation</h1>
+    </div>
+  </header>
+  <main class="wrap main">
+    <section id="pin-guide" class="pin-card">
+      <div>
+        <h2 id="pin-title" data-copy="pin_title">Pin Website Citation</h2>
+        <ol class="pin-steps">
+          <li data-copy="pin_step_1">Click the puzzle piece at the top right of Chrome.</li>
+          <li data-copy="pin_step_2">Click the pin next to Website Citation.</li>
+        </ol>
+      </div>
+      <a class="shot shot-pin" href="./assets/pin.png" aria-labelledby="pin-title">
+        <img src="/welcome/assets/pin.png" alt="" width="280" height="244">
+      </a>
+    </section>
+    <section id="usage-guide" hidden>
+      <div class="intro">
+        <div>
+          <h2 data-copy="usage_title">Cite your first page</h2>
+          <p data-copy="usage_intro">Try the example or use an article of your own.</p>
+        </div>
+        <a id="try-example" class="primary" href="./example/" data-copy="try_example">Try an example</a>
+      </div>
+      <ol class="steps">
+        <li>
+          <p id="usage-step-1" data-copy="usage_step_1">Open an article.</p>
+          <a class="shot shot-article" href="./assets/article.png" aria-labelledby="usage-step-1">
+            <img src="/welcome/assets/article.png" alt="" width="1680" height="3400">
+          </a>
+        </li>
+        <li>
+          <p id="usage-step-2" data-copy="usage_step_2">Choose “Cite this page”.</p>
+          <p class="hint" data-copy="usage_icon_hint">First, open Website Citation using its toolbar icon.</p>
+          <a class="shot" href="./assets/popup.png" aria-labelledby="usage-step-2">
+            <img src="/welcome/assets/popup.png" alt="" width="1440" height="860">
+          </a>
+        </li>
+        <li>
+          <p id="usage-step-3" data-copy="usage_step_3">Review the generated citation.</p>
+          <a class="shot shot-preview" href="./assets/composer.png" aria-labelledby="usage-step-3">
+            <img src="/welcome/assets/composer.png" alt="" width="1440" height="900">
+          </a>
+        </li>
+        <li>
+          <p id="usage-step-4" data-copy="usage_step_4">Choose “Save to library”.</p>
+          <a class="shot" href="./assets/save.png" aria-labelledby="usage-step-4">
+            <img src="/welcome/assets/save.png" alt="" width="976" height="144">
+          </a>
+          <a class="shot shot-preview" href="./assets/library.png" aria-labelledby="usage-step-4">
+            <img src="/welcome/assets/library.png" alt="" width="1440" height="580">
+          </a>
+        </li>
+      </ol>
+    </section>
+  </main>
+  <footer class="wrap">
+    <div class="switch">
+      <label for="guide-mode" data-copy="mode_label">Choose a guide</label>
+      <select id="guide-mode" name="mode">
+        <option value="pin" data-copy="mode_pin">How to pin the extension</option>
+        <option value="usage" data-copy="mode_usage">How to cite a page</option>
+      </select>
+    </div>
+    <div class="status">
+      <span id="status-text" role="status" aria-live="polite">Pin status is unknown.</span>
+      <button id="retry" type="button" data-copy="retry" hidden>Try again</button>
+    </div>
+  </footer>
+</body>
+</html>

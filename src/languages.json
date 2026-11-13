@@ -1,0 +1,142 @@
+{
+  "ar": {
+    "autonym": "العربية",
+    "english_name": "Arabic",
+    "flag_country": "SA"
+  },
+  "de": {
+    "autonym": "Deutsch",
+    "english_name": "German",
+    "flag_country": "DE"
+  },
+  "el": {
+    "autonym": "Ελληνικά",
+    "english_name": "Greek",
+    "flag_country": "GR"
+  },
+  "en": {
+    "autonym": "English",
+    "english_name": "English",
+    "flag_country": "US"
+  },
+  "es": {
+    "autonym": "Español",
+    "english_name": "Spanish",
+    "flag_country": "ES"
+  },
+  "et": {
+    "autonym": "Eesti",
+    "english_name": "Estonian",
+    "flag_country": "EE"
+  },
+  "fi": {
+    "autonym": "Suomi",
+    "english_name": "Finnish",
+    "flag_country": "FI"
+  },
+  "fil": {
+    "autonym": "Filipino",
+    "english_name": "Filipino",
+    "flag_country": "PH"
+  },
+  "fr": {
+    "autonym": "Français",
+    "english_name": "French",
+    "flag_country": "FR"
+  },
+  "hi": {
+    "autonym": "हिन्दी",
+    "english_name": "Hindi",
+    "flag_country": "IN"
+  },
+  "hr": {
+    "autonym": "Hrvatski",
+    "english_name": "Croatian",
+    "flag_country": "HR"
+  },
+  "hu": {
+    "autonym": "Magyar",
+    "english_name": "Hungarian",
+    "flag_country": "HU"
+  },
+  "id": {
+    "autonym": "Bahasa Indonesia",
+    "english_name": "Indonesian",
+    "flag_country": "ID"
+  },
+  "it": {
+    "autonym": "Italiano",
+    "english_name": "Italian",
+    "flag_country": "IT"
+  },
+  "ja": {
+    "autonym": "日本語",
+    "english_name": "Japanese",
+    "flag_country": "JP"
+  },
+  "ko": {
+    "autonym": "한국어",
+    "english_name": "Korean",
+    "flag_country": "KR"
+  },
+  "nl": {
+    "autonym": "Nederlands",
+    "english_name": "Dutch",
+    "flag_country": "NL"
+  },
+  "no": {
+    "autonym": "Norsk",
+    "english_name": "Norwegian",
+    "flag_country": "NO"
+  },
+  "pl": {
+    "autonym": "Polski",
+    "english_name": "Polish",
+    "flag_country": "PL"
+  },
+  "pt_BR": {
+    "autonym": "Português (Brasil)",
+    "english_name": "Portuguese (Brazil)",
+    "flag_country": "BR"
+  },
+  "pt_PT": {
+    "autonym": "Português (Portugal)",
+    "english_name": "Portuguese (Portugal)",
+    "flag_country": "PT"
+  },
+  "ru": {
+    "autonym": "Русский",
+    "english_name": "Russian",
+    "flag_country": "RU"
+  },
+  "sv": {
+    "autonym": "Svenska",
+    "english_name": "Swedish",
+    "flag_country": "SE"
+  },
+  "th": {
+    "autonym": "ไทย",
+    "english_name": "Thai",
+    "flag_country": "TH"
+  },
+  "tr": {
+    "autonym": "Türkçe",
+    "english_name": "Turkish",
+    "flag_country": "TR"
+  },
+  "uk": {
+    "autonym": "Українська",
+    "english_name": "Ukrainian",
+    "flag_country": "UA"
+  },
+  "vi": {
+    "autonym": "Tiếng Việt",
+    "english_name": "Vietnamese",
+    "flag_country": "VN"
+  },
+  "zh_CN": {
+    "autonym": "简体中文",
+    "english_name": "Chinese (Simplified)",
+    "flag_country": "CN"
+  }
+}

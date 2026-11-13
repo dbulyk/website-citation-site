@@ -1,4 +1,6 @@
 import { formatCitation } from './formatter.js';
+import { applySiteCopy, getSiteLanguageLabel, setSiteCopy } from './site-language.js';
+import { mountLanguageDialog } from './language-dialog.js';
 
 const byId = (id) => document.getElementById(id);
 const source = byId('source-details');
@@ -40,14 +42,13 @@ const examples = {
     authorType: 'none',
   },
 };
-const emptyCitation = 'Your citation will appear here as you enter the source details.';
 let currentCitation;
 let copyPending = false;
 let copyOfferInterrupted = false;
 
-function setError(element, message, ...fields) {
-  element.textContent = message;
-  for (const field of fields) field.setAttribute('aria-invalid', String(Boolean(message)));
+function setError(element, key, ...fields) {
+  setSiteCopy(element, key);
+  for (const field of fields) field.setAttribute('aria-invalid', String(Boolean(key)));
 }
 
 function authorFields(row) {
@@ -66,7 +67,7 @@ function readAuthor(row, type, error) {
   row.querySelector('[data-organization-field]').hidden = !namedOrganization;
   const missingFamily = person && !family.value.trim();
   const missingOrganization = namedOrganization && !organization.value.trim();
-  setError(error, missingFamily ? 'Enter a last name.' : missingOrganization ? 'Enter an organization name.' : '');
+  setError(error, missingFamily ? 'validation.last' : missingOrganization ? 'validation.organization' : '');
   family.setAttribute('aria-invalid', String(missingFamily));
   organization.setAttribute('aria-invalid', String(missingOrganization));
   if (person) return { type, given: given.value, family: family.value };
@@ -91,21 +92,21 @@ function readPublicationDate() {
     return part ? (/^\d+$/.test(part) ? Number(part) : NaN) : undefined;
   });
   byId('publication-date').hidden = noDate;
-  let message = '';
+  let errorKey = '';
   let invalid;
   if (!noDate) {
     if (!Number.isSafeInteger(year) || year < 1) {
-      message = 'Enter a valid publication year, or select No date.';
+      errorKey = 'validation.year';
       invalid = dateFields[0];
     } else if ((month !== undefined || day !== undefined) && !(month >= 1 && month <= 12)) {
-      message = 'Enter a month from 1 to 12.';
+      errorKey = 'validation.month';
       invalid = dateFields[1];
     } else if (day !== undefined && !(day >= 1 && day <= new Date(Date.UTC(2000 + year % 400, month, 0)).getUTCDate())) {
-      message = 'Enter a valid day for that month and year.';
+      errorKey = 'validation.day';
       invalid = dateFields[2];
     }
   }
-  byId('date-error').textContent = message;
+  setSiteCopy(byId('date-error'), errorKey);
   for (const field of dateFields) field.setAttribute('aria-invalid', String(field === invalid));
   return noDate ? undefined : { year, month, day };
 }
@@ -113,7 +114,7 @@ function readPublicationDate() {
 function readAccessDate() {
   const field = byId('access-date');
   const date = field.valueAsDate;
-  setError(byId('access-date-error'), field.validity.badInput ? 'Enter a complete, valid access date.' : '', field);
+  setError(byId('access-date-error'), field.validity.badInput ? 'validation.access' : '', field);
   if (date) return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
 }
 
@@ -122,11 +123,9 @@ function render() {
   const inText = checked('mode') === 'intext';
   byId('intext-options').hidden = !inText;
   byId('locator-fields').hidden = !inText;
-  byId('result-style').textContent = style === 'apa' ? 'APA 7' : 'MLA 9';
-  byId('result-label').textContent = inText ? 'In-text' : 'Reference';
-  byId('result-help').textContent = inText
-    ? 'Use this short citation in the text of your work.'
-    : 'Use this full entry in your reference list. In MLA, add it to your Works Cited list.';
+  setSiteCopy(byId('result-style'), style === 'apa' ? 'style.apa' : 'style.mla');
+  setSiteCopy(byId('result-label'), inText ? 'result.intext' : 'result.reference');
+  setSiteCopy(byId('result-help'), inText ? 'result.help_intext' : 'result.help_reference');
 
   const url = value('url');
   const title = value('title');
@@ -141,11 +140,11 @@ function render() {
     form: inText ? checked('form') : undefined,
   };
   const validUrl = /^https?:\/\//i.test(url) && URL.canParse(url);
-  setError(byId('url-error'), validUrl ? '' : 'Enter a valid website URL, including https:// or http://.', byId('url'));
-  setError(byId('title-error'), title ? '' : 'Enter a page title.', byId('title'));
+  setError(byId('url-error'), validUrl ? '' : 'validation.url', byId('url'));
+  setError(byId('title-error'), title ? '' : 'validation.title', byId('title'));
 
   currentCitation = undefined;
-  let placeholder = emptyCitation;
+  let placeholderKey = 'result.empty';
   const hasActiveInvalidField = Array.from(source.querySelectorAll('[aria-invalid="true"]'))
     .some((field) => !field.closest('[hidden]'));
   if (!hasActiveInvalidField) {
@@ -153,18 +152,22 @@ function render() {
       const result = formatCitation(input);
       currentCitation = inText ? result.inText : result.reference;
     } catch {
-      placeholder = 'Couldn’t create the citation. Check the source details.';
+      placeholderKey = 'error.format';
     }
   }
   citation.classList.toggle('empty', !currentCitation);
   copyButton.disabled = !currentCitation;
-  if (currentCitation) citation.innerHTML = currentCitation.html;
-  else citation.textContent = placeholder;
+  if (currentCitation) {
+    delete citation.dataset.siteCopy;
+    citation.innerHTML = currentCitation.html;
+  } else {
+    setSiteCopy(citation, placeholderKey);
+  }
 }
 
-function reportCopy(message = '', failed = false) {
+function reportCopy(key = '', failed = false) {
   copyStatus.classList.toggle('error-status', failed);
-  copyStatus.textContent = message;
+  setSiteCopy(copyStatus, key);
 }
 
 function update() {
@@ -203,8 +206,8 @@ function renumberAuthors() {
     const { family, organization } = authorFields(row);
     family.setAttribute('aria-describedby', error.id);
     organization.setAttribute('aria-describedby', error.id);
-    row.querySelector('legend').textContent = 'Author ' + number;
-    row.querySelector('[data-remove-author]').textContent = 'Remove author ' + number;
+    setSiteCopy(row.querySelector('legend'), 'author.numbered', number);
+    setSiteCopy(row.querySelector('[data-remove-author]'), 'author.remove_numbered', number);
   });
 }
 
@@ -218,6 +221,7 @@ function changeAuthorRows(focusTarget) {
 addAuthor.addEventListener('click', () => {
   const row = byId('author-template').content.firstElementChild.cloneNode(true);
   extraAuthors.append(row);
+  applySiteCopy(row, document.documentElement.lang);
   changeAuthorRows(authorFields(row).given);
 });
 
@@ -257,14 +261,14 @@ const installLink = byId('auto-offer');
 const closeCopyOffer = byId('close-auto-offer');
 const copyRow = byId('copy-row');
 const offerCopy = {
-  capture: ['Capture details from a page', 'Open the source page in desktop Chrome and use Website Citation to collect its citation details.'],
-  library: ['Keep citations in your library', 'Use the Website Citation extension to save citations in its library for later.'],
+  capture: ['dialog.capture_title', 'dialog.capture_body'],
+  library: ['dialog.library_title', 'dialog.library_body'],
 };
 let offerTrigger;
 
 function setCopyOffer(visible) {
   copyRow.classList.toggle('has-offer', visible);
-  copyButton.textContent = visible ? 'Copy again' : 'Copy citation';
+  setSiteCopy(copyButton, visible ? 'result.copy_again' : 'result.copy');
   installLink.hidden = closeCopyOffer.hidden = !visible;
 }
 
@@ -282,7 +286,7 @@ closeCopyOffer.addEventListener('click', () => {
   dismissCopyOffer();
 });
 document.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape' || dialog.open) return;
+  if (event.key !== 'Escape' || document.querySelector('dialog:modal')) return;
   dismissCopyOffer();
 });
 
@@ -290,8 +294,8 @@ for (const button of document.querySelectorAll('[data-offer]')) {
   button.addEventListener('click', () => {
     offerTrigger = button;
     const [heading, body] = offerCopy[button.dataset.offer];
-    byId('offer-title').textContent = heading;
-    byId('offer-body').textContent = body;
+    setSiteCopy(byId('offer-title'), heading);
+    setSiteCopy(byId('offer-body'), body);
     dismissCopyOffer();
     dialog.showModal();
   });
@@ -335,15 +339,41 @@ copyButton.addEventListener('click', async () => {
   copyPending = true;
   try {
     await writeCitation(copied);
-    reportCopy(copied === currentCitation ? 'Citation copied.' : 'Previous citation copied.');
+    reportCopy(copied === currentCitation ? 'copy.success' : 'copy.previous');
     if (!dialog.open && !copyOfferInterrupted && copied === currentCitation) {
       setCopyOffer(true);
     }
   } catch {
-    reportCopy('Couldn’t copy the citation. Please try again.', true);
+    reportCopy('copy.error', true);
   } finally {
     copyPending = false;
   }
+});
+
+const walkthrough = document.querySelector('.walkthrough-frame');
+
+function localizeWalkthrough() {
+  const demoDocument = walkthrough.contentDocument;
+  if (!demoDocument?.documentElement) return;
+  const language = document.documentElement.lang;
+  demoDocument.documentElement.lang = language;
+  applySiteCopy(demoDocument, language);
+}
+
+function setLanguage(language) {
+  document.documentElement.lang = language;
+  applySiteCopy(document, language);
+  localizeWalkthrough();
+}
+
+const initialLanguage = new URL(location.href).searchParams.get('lang') === 'ru' ? 'ru' : 'en';
+walkthrough.addEventListener('load', localizeWalkthrough);
+setLanguage(initialLanguage);
+mountLanguageDialog(byId('site-language'), {
+  locale: initialLanguage,
+  locales: ['en', 'ru'],
+  getLabel: getSiteLanguageLabel,
+  onChange: setLanguage,
 });
 
 selectExample('person');
@@ -369,7 +399,6 @@ if ('ResizeObserver' in window) {
     resultPanel.style.setProperty('--result-height', `${height}px`);
   }).observe(resultPanel, { box: 'border-box' });
 
-  const walkthrough = document.querySelector('.walkthrough-frame');
   const demoObserver = new ResizeObserver(([entry]) => {
     walkthrough.style.height = `${Math.ceil(entry.target.getBoundingClientRect().height)}px`;
   });
