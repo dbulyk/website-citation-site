@@ -27,7 +27,7 @@ for (const width of [1022, 768, 390, 320]) {
       expect(box.width).toBeGreaterThanOrEqual(44);
       expect(box.height).toBeGreaterThanOrEqual(44);
     }
-    await expect(demo.getByText(/simulation only/i)).toBeVisible();
+    await expect(demo.getByText('This is a simulation. No page is read and nothing is saved to your library.', { exact: true })).toBeVisible();
     await checkHint(capture);
     await touchTarget(capture);
     await capture.click();
