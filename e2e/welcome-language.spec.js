@@ -42,6 +42,7 @@ test('changing language preserves manual mode, status, focus and extension conte
   await expect(language).toBeFocused();
   await expect(status).not.toBeEmpty();
   await expectContext(page, 'ru');
+  await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute('href', 'https://citewebsite.app/welcome/?lang=ru');
   await chooseLanguage(page, /العربية/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
@@ -54,6 +55,7 @@ test('changing language preserves manual mode, status, focus and extension conte
   await expect(page.getByRole('heading', { name: 'Cite your first page' })).toBeVisible();
   await expect(language).toBeFocused();
   await expectContext(page, 'en');
+  await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute('href', 'https://citewebsite.app/welcome/');
 });
 
 test('example and return retain language and extension context; unsupported language falls back', async ({ page }) => {

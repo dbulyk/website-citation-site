@@ -1,9 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { defineConfig } from 'vite';
+import { canonicalOrigin, generateSitemap, indexablePages } from './seo.js';
+
+const htmlInputs = [...Object.keys(indexablePages), '/demo/', '/welcome/example/']
+  .map((route) => `${route.slice(1)}index.html`);
 
 const staticFiles = [
   'uninstall/index.html',
-  'credits/index.html',
   'third-party/NOTICE.md',
   'third-party/citeproc-LICENSE',
   'third-party/CPAL-1.0.txt',
@@ -19,10 +22,22 @@ export default defineConfig({
   base: './',
   build: {
     rolldownOptions: {
-      input: ['index.html', 'demo/index.html', 'welcome/index.html', 'welcome/example/index.html'],
+      input: htmlInputs,
     },
   },
   plugins: [{
+    name: 'site-seo',
+    transformIndexHtml(_, { path }) {
+      if (!htmlInputs.includes(path.slice(1))) return;
+      const route = path.replace(/index\.html$/, '');
+      return [{ tag: 'link', attrs: { rel: 'canonical', href: new URL(route, canonicalOrigin).href }, injectTo: 'head' }];
+    },
+    async generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: await generateSitemap() });
+      const source = `User-agent: *\nAllow: /\nSitemap: ${canonicalOrigin}/sitemap.xml\n`;
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source });
+    },
+  }, {
     name: 'copy-static-files',
     async generateBundle() {
       for (const fileName of staticFiles) {

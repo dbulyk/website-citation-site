@@ -34,6 +34,7 @@ test('homepage language control offers only English and Russian and preserves ci
   const citation = await page.locator('#citation').innerHTML();
   await chooseLanguage(page, /Русский/);
   await expectLocale(page, 'ru');
+  await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute('href', 'https://citewebsite.app/?lang=ru');
   await expect(page.getByRole('button', { name: 'Язык: Русский', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Цитирование сайта', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
@@ -44,6 +45,7 @@ test('homepage language control offers only English and Russian and preserves ci
   expect(await page.locator('#citation').innerHTML()).toBe(citation);
   await chooseLanguage(page, /English/);
   await expectLocale(page, 'en');
+  await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute('href', 'https://citewebsite.app/');
   await expect(page.getByRole('heading', { name: 'Cite a website', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
   expect(await page.locator('#citation').innerHTML()).toBe(citation);

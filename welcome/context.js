@@ -1,6 +1,7 @@
 import { mountLanguageDialog } from '../src/language-dialog.js';
 
 const dictionaries = import.meta.glob('./locales/*.json', { eager: true, import: 'default' });
+const locales = Object.keys(dictionaries).map((path) => path.slice('./locales/'.length, -'.json'.length));
 
 export function readContext() {
   const search = new URLSearchParams(location.search);
@@ -41,6 +42,7 @@ export function bindLanguageSelector(initialContext, titleKey, onLocaleChange) {
   render(initialContext);
   mountLanguageDialog(document.querySelector('#language'), {
     locale: initialContext.locale,
+    locales,
     getLabel: (locale) => dictionaries[`./locales/${locale}.json`].language_label,
     onChange: () => render(readContext()),
   });

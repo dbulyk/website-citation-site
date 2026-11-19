@@ -19,7 +19,7 @@ function flag(country) {
   return String.fromCodePoint(...Array.from(country, (letter) => 0x1f1e6 + letter.charCodeAt(0) - 65));
 }
 
-export function mountLanguageDialog(trigger, { locale, locales = Object.keys(languages), getLabel, onChange }) {
+export function mountLanguageDialog(trigger, { locale, locales, getLabel, onChange }) {
   const triggerFlag = decoration('language-flag');
   const triggerName = element('bdi', 'language-trigger-name');
   triggerName.dir = 'auto';
