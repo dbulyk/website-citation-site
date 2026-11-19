@@ -362,7 +362,7 @@ function localizeWalkthrough() {
 }
 
 function setLanguage(language) {
-  setCanonicalLanguage(language);
+  setCanonicalLanguage('/', language);
   document.documentElement.lang = language;
   applySiteCopy(document, language);
   localizeWalkthrough();

@@ -11,6 +11,8 @@ export const indexablePages = {
   '/credits/': null,
 };
 
+const hreflangAliases = new Map([['fil', 'tl']]);
+
 function escapeXml(value) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
@@ -22,7 +24,10 @@ async function pageEntries([route, localeDirectory]) {
       .filter((file) => file.isFile() && file.name.endsWith('.json'))
       .map((file) => file.name.slice(0, -'.json'.length)).sort()
     : ['en'];
-  const variants = locales.map((locale) => ({ tag: locale.replaceAll('_', '-'), url: localizedUrl(base, locale) }));
+  const variants = locales.map((locale) => ({
+    tag: hreflangAliases.get(locale) ?? locale.replaceAll('_', '-'),
+    url: localizedUrl(base, locale),
+  }));
   const alternates = [...variants, { tag: 'x-default', url: base }]
     .map(({ tag, url }) => `    <xhtml:link rel="alternate" hreflang="${escapeXml(tag)}" href="${escapeXml(url)}"/>`);
 

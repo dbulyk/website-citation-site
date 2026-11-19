@@ -16,7 +16,13 @@ function decoration(className, text) {
 }
 
 function flag(country) {
-  return String.fromCodePoint(...Array.from(country, (letter) => 0x1f1e6 + letter.charCodeAt(0) - 65));
+  return String.fromCodePoint(...Array.from(country ?? '', (letter) => 0x1f1e6 + letter.charCodeAt(0) - 65));
+}
+
+function describeLanguage(code) {
+  const tag = code.replaceAll('_', '-');
+  const { autonym = tag, english_name: englishName = tag, flag_country: country } = languages[code] ?? {};
+  return { tag, autonym, englishName, country };
 }
 
 export function mountLanguageDialog(trigger, { locale, locales, getLabel, onChange }) {
@@ -54,8 +60,7 @@ export function mountLanguageDialog(trigger, { locale, locales, getLabel, onChan
   }
 
   const options = locales.map((code) => {
-    const { autonym, english_name: englishName, flag_country: country } = languages[code];
-    const tag = code.replace('_', '-');
+    const { tag, autonym, englishName, country } = describeLanguage(code);
     const button = element('button', 'language-option');
     button.type = 'button';
     const name = element('bdi', 'language-option-name', autonym);
@@ -91,17 +96,19 @@ export function mountLanguageDialog(trigger, { locale, locales, getLabel, onChan
       button.hidden = !terms.some((term) => term.includes(query));
       hasResults ||= !button.hidden;
     }
-    empty.textContent = hasResults ? '' : translations[locale].no_languages_found;
+    empty.textContent = hasResults ? '' : translations[locale]?.no_languages_found ?? translations.en.no_languages_found;
   }
 
   function renderLocale() {
-    const copy = translations[locale];
-    const { autonym, flag_country: country } = languages[locale];
-    dialog.lang = triggerName.lang = locale.replace('_', '-');
+    const copy = { ...translations.en, ...translations[locale] };
+    const { tag, autonym, country } = describeLanguage(locale);
+    const label = getLabel(locale);
+    dialog.lang = Object.hasOwn(translations, locale) ? tag : 'en';
+    triggerName.lang = tag;
     dialog.dir = locale === 'ar' ? 'rtl' : 'ltr';
     triggerFlag.textContent = flag(country);
     triggerName.textContent = autonym;
-    trigger.setAttribute('aria-label', `${getLabel(locale)}: ${autonym}`);
+    trigger.setAttribute('aria-label', typeof label === 'string' && label.trim() ? `${label}: ${autonym}` : autonym);
     title.textContent = copy.choose_language;
     close.setAttribute('aria-label', copy.close);
     if (search) {

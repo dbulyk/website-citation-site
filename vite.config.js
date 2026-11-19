@@ -20,6 +20,7 @@ const staticFiles = [
 
 export default defineConfig({
   base: './',
+  define: { __CANONICAL_ORIGIN__: JSON.stringify(canonicalOrigin) },
   build: {
     rolldownOptions: {
       input: htmlInputs,
@@ -28,8 +29,8 @@ export default defineConfig({
   plugins: [{
     name: 'site-seo',
     transformIndexHtml(_, { path }) {
-      if (!htmlInputs.includes(path.slice(1))) return;
       const route = path.replace(/index\.html$/, '');
+      if (!htmlInputs.includes(`${route.slice(1)}index.html`) || indexablePages[route]) return;
       return [{ tag: 'link', attrs: { rel: 'canonical', href: new URL(route, canonicalOrigin).href }, injectTo: 'head' }];
     },
     async generateBundle() {

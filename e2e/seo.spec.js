@@ -29,9 +29,16 @@ test('sitemap locations serve directly and robots advertises the sitemap', async
   ]);
 });
 
-test('every built HTML route declares exactly one canonical in its static head', async ({ page, request }) => {
+test('built HTML declares static canonicals only for routes without localized canonicals', async ({ page, request }) => {
   await page.route('**/*', (route) => route.abort());
-  for (const path of ['/', '/welcome/', '/welcome/example/', '/credits/', '/demo/', '/uninstall/']) {
+  for (const [path, href] of [
+    ['/', null],
+    ['/welcome/', null],
+    ['/welcome/example/', `${origin}/welcome/example/`],
+    ['/credits/', `${origin}/credits/`],
+    ['/demo/', `${origin}/demo/`],
+    ['/uninstall/', `${origin}/uninstall/`],
+  ]) {
     const response = await request.get(path, { maxRedirects: 0 });
     expect(response.status(), path).toBe(200);
     const links = await page.evaluate((html) => {
@@ -41,14 +48,17 @@ test('every built HTML route declares exactly one canonical in its static head',
         inHead: parsed.head.contains(link),
       }));
     }, await response.text());
-    expect(links, path).toEqual([{ href: `${origin}${path}`, inHead: true }]);
+    expect.soft(links, path).toEqual(href ? [{ href, inHead: true }] : []);
   }
 });
 
 test('home and welcome canonicalize through the validated locale on load', async ({ page }) => {
   for (const [path, expected] of [
+    ['/', '/'],
     ['/?lang=ru', '/?lang=ru'],
+    ['/?lang=ru&extensionId=abcdefghijklmnopabcdefghijklmnop#details', '/?lang=ru'],
     ['/?lang=de', '/'],
+    ['/welcome/', '/welcome/'],
     ['/welcome/?lang=de', '/welcome/?lang=de'],
     ['/welcome/?extensionId=abcdefghijklmnopabcdefghijklmnop&lang=de&pinned=true#usage', '/welcome/?lang=de'],
     ['/welcome/?lang=pt_BR', '/welcome/?lang=pt_BR'],
@@ -57,6 +67,13 @@ test('home and welcome canonicalize through the validated locale on load', async
     ['/welcome/example/?lang=de', '/welcome/example/'],
   ]) {
     await page.goto(path);
+    await expect(page.locator('link[rel~="canonical"]'), path).toHaveCount(1);
     await expect(page.locator(canonical), path).toHaveAttribute('href', `${origin}${expected}`);
   }
+});
+
+test('the Filipino welcome page keeps its locale in the canonical and document language', async ({ page }) => {
+  await page.goto('/welcome/?lang=fil');
+  await expect(page.locator(canonical)).toHaveAttribute('href', `${origin}/welcome/?lang=fil`);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fil');
 });

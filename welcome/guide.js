@@ -120,7 +120,7 @@ async function refresh() {
 }
 
 bindLanguageSelector(initialContext, 'guide_title', (context) => {
-  setCanonicalLanguage(context.locale);
+  setCanonicalLanguage('/welcome/', context.locale);
   copy = context.copy;
   carryContext(exampleLink, context.params);
   renderStatus();

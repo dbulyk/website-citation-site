@@ -2,8 +2,15 @@ import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 import test from 'node:test';
 import { generateSitemap } from '../seo.js';
+import { localizedUrl } from '../src/canonical.js';
 
 const origin = 'https://citewebsite.app';
+
+test('localized canonical URLs retain only a non-default locale', () => {
+  const base = `${origin}/welcome/?extensionId=abcdefghijklmnopabcdefghijklmnop&lang=ru&pinned=true#usage`;
+  assert.equal(localizedUrl(base, 'de'), `${origin}/welcome/?lang=de`);
+  assert.equal(localizedUrl(base, 'en'), `${origin}/welcome/`);
+});
 
 async function localeCodes(directory) {
   const files = await readdir(new URL(directory, import.meta.url), { withFileTypes: true });
@@ -30,7 +37,10 @@ test('sitemap has one URL per public route and locale with symmetric hreflang se
     ['/credits/', ['en']],
   ]) {
     const base = `${origin}${path}`;
-    const variants = locales.map((code) => [code.replaceAll('_', '-'), code === 'en' ? base : `${base}?lang=${encodeURIComponent(code)}`]);
+    const variants = locales.map((code) => [
+      code === 'fil' ? 'tl' : code.replaceAll('_', '-'),
+      code === 'en' ? base : `${base}?lang=${encodeURIComponent(code)}`,
+    ]);
     const alternates = [...variants, ['x-default', base]].sort();
     for (const [, url] of variants) expected.set(url, alternates);
   }
@@ -41,6 +51,9 @@ test('sitemap has one URL per public route and locale with symmetric hreflang se
     assert.ok(url.startsWith(`${origin}/`));
     assert.equal(links.replace(linkPattern, '').trim(), '', `only complete alternate links for ${url}`);
     const alternates = [...links.matchAll(linkPattern)].map(([, tag, href]) => [tag, href]);
+    for (const [tag, href] of alternates) {
+      if (tag !== 'x-default') assert.match(tag, /^[a-z]{2}(-[A-Z]{2}|-[A-Z][a-z]{3})?$/, href);
+    }
     assert.deepEqual(alternates.sort(), expected.get(url), url);
   }
 });
