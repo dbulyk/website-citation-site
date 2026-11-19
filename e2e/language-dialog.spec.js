@@ -1,5 +1,49 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { createServer } from 'vite';
+
+test('a welcome locale with missing dialog metadata leaves language selection usable', async ({ page }) => {
+  const server = await createServer({
+    server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
+    plugins: [{
+      name: 'missing-german-dialog-metadata',
+      enforce: 'pre',
+      transform(source, id) {
+        if (id.endsWith('/src/languages.json') || id.endsWith('/src/language-dialog-copy.json')) {
+          const entries = JSON.parse(source);
+          delete entries.de;
+          return JSON.stringify(entries);
+        }
+        if (id.endsWith('/welcome/locales/de.json')) {
+          const copy = JSON.parse(source);
+          delete copy.language_label;
+          return JSON.stringify(copy);
+        }
+      },
+    }],
+  });
+  try {
+    await server.listen();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.goto(new URL('/welcome/', server.resolvedUrls.local[0]).href);
+    expect(errors).toEqual([]);
+    await page.getByRole('button', { name: 'Language: English', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: /^de\b/ }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+    await page.getByRole('button', { name: 'de', exact: true }).click();
+    const search = dialog.getByRole('searchbox', { name: 'Search languages' });
+    await search.fill('no-language-matches-this');
+    await expect(dialog.getByText('No languages found', { exact: true })).toBeVisible();
+    await search.fill('English');
+    await dialog.getByRole('button', { name: /English/ }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    expect(errors).toEqual([]);
+  } finally {
+    await server.close();
+  }
+});
 
 test('search filters by autonym, English name and code, with an empty state', async ({ page }) => {
   await page.goto('/welcome/');

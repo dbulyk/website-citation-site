@@ -114,6 +114,8 @@ jobs:
 
           verify / dist/index.html
           verify /welcome/ dist/welcome/index.html
+          verify /sitemap.xml dist/sitemap.xml
+          verify /robots.txt dist/robots.txt
           for asset in dist/assets/*; do
             verify "/${asset#dist/}" "$asset"
           done

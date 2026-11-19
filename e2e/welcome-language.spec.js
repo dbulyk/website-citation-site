@@ -31,6 +31,9 @@ test('changing language preserves manual mode, status, focus and extension conte
   await page.goto(`/welcome/?extensionId=${extensionId}#usage`, { waitUntil: 'domcontentloaded' });
   const language = headerLanguage(page);
   await expect(page.getByRole('button', { name: 'Language: English', exact: true })).toBeVisible();
+  const canonical = page.locator('head link[rel="canonical"]');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/welcome/');
+  const initialCanonical = await canonical.elementHandle();
   await language.focus();
   const status = page.locator('footer [aria-live]');
   await expect(status).not.toBeEmpty();
@@ -42,6 +45,8 @@ test('changing language preserves manual mode, status, focus and extension conte
   await expect(language).toBeFocused();
   await expect(status).not.toBeEmpty();
   await expectContext(page, 'ru');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/welcome/?lang=ru');
+  expect(await canonical.evaluate((link, initial) => link === initial, initialCanonical)).toBe(true);
   await chooseLanguage(page, /العربية/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
@@ -54,6 +59,8 @@ test('changing language preserves manual mode, status, focus and extension conte
   await expect(page.getByRole('heading', { name: 'Cite your first page' })).toBeVisible();
   await expect(language).toBeFocused();
   await expectContext(page, 'en');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/welcome/');
+  expect(await canonical.evaluate((link, initial) => link === initial, initialCanonical)).toBe(true);
 });
 
 test('example and return retain language and extension context; unsupported language falls back', async ({ page }) => {

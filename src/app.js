@@ -1,6 +1,7 @@
 import { formatCitation } from './formatter.js';
-import { applySiteCopy, getSiteLanguageLabel, setSiteCopy } from './site-language.js';
+import { applySiteCopy, getSiteLanguageLabel, setSiteCopy, siteLocales } from './site-language.js';
 import { mountLanguageDialog } from './language-dialog.js';
+import { setCanonicalLanguage } from './canonical.js';
 
 const byId = (id) => document.getElementById(id);
 const source = byId('source-details');
@@ -361,17 +362,19 @@ function localizeWalkthrough() {
 }
 
 function setLanguage(language) {
+  setCanonicalLanguage('/', language);
   document.documentElement.lang = language;
   applySiteCopy(document, language);
   localizeWalkthrough();
 }
 
-const initialLanguage = new URL(location.href).searchParams.get('lang') === 'ru' ? 'ru' : 'en';
+const requestedLanguage = new URLSearchParams(location.search).get('lang');
+const initialLanguage = siteLocales.includes(requestedLanguage) ? requestedLanguage : 'en';
 walkthrough.addEventListener('load', localizeWalkthrough);
 setLanguage(initialLanguage);
 mountLanguageDialog(byId('site-language'), {
   locale: initialLanguage,
-  locales: ['en', 'ru'],
+  locales: siteLocales,
   getLabel: getSiteLanguageLabel,
   onChange: setLanguage,
 });

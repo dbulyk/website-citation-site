@@ -1,7 +1,8 @@
-import en from './site-copy/en.json';
-import ru from './site-copy/ru.json';
+const files = import.meta.glob('./site-copy/*.json', { eager: true, import: 'default' });
+const dictionaries = Object.fromEntries(Object.entries(files)
+  .map(([path, copy]) => [path.slice('./site-copy/'.length, -'.json'.length), copy]));
 
-const dictionaries = { en, ru };
+export const siteLocales = Object.keys(dictionaries);
 
 export function getSiteLanguageLabel(language) {
   return dictionaries[language]['language.label'];

@@ -19,6 +19,9 @@ test('homepage language control offers only English and Russian and preserves ci
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   const control = page.getByRole('button', { name: 'Language: English', exact: true });
   await expect(control).toBeVisible();
+  const canonical = page.locator('head link[rel="canonical"]');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/');
+  const initialCanonical = await canonical.elementHandle();
   await control.click();
   const dialog = page.getByRole('dialog', { name: 'Choose language' });
   await expect(dialog.getByRole('button', { pressed: true })).toHaveCount(1);
@@ -34,6 +37,8 @@ test('homepage language control offers only English and Russian and preserves ci
   const citation = await page.locator('#citation').innerHTML();
   await chooseLanguage(page, /Русский/);
   await expectLocale(page, 'ru');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/?lang=ru');
+  expect(await canonical.evaluate((link, initial) => link === initial, initialCanonical)).toBe(true);
   await expect(page.getByRole('button', { name: 'Язык: Русский', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Цитирование сайта', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
@@ -44,6 +49,8 @@ test('homepage language control offers only English and Russian and preserves ci
   expect(await page.locator('#citation').innerHTML()).toBe(citation);
   await chooseLanguage(page, /English/);
   await expectLocale(page, 'en');
+  await expect(canonical).toHaveAttribute('href', 'https://citewebsite.app/');
+  expect(await canonical.evaluate((link, initial) => link === initial, initialCanonical)).toBe(true);
   await expect(page.getByRole('heading', { name: 'Cite a website', exact: true })).toBeVisible();
   await expect(page.locator('#title')).toHaveValue('My edited source title');
   expect(await page.locator('#citation').innerHTML()).toBe(citation);

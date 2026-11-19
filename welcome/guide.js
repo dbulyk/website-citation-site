@@ -1,4 +1,5 @@
 import { bindLanguageSelector, carryContext, readContext } from './context.js';
+import { setCanonicalLanguage } from '../src/canonical.js';
 
 const FIRST_CHECK_MS = 1000;
 const POLL_INTERVAL_MS = 1500;
@@ -119,6 +120,7 @@ async function refresh() {
 }
 
 bindLanguageSelector(initialContext, 'guide_title', (context) => {
+  setCanonicalLanguage('/welcome/', context.locale);
   copy = context.copy;
   carryContext(exampleLink, context.params);
   renderStatus();
